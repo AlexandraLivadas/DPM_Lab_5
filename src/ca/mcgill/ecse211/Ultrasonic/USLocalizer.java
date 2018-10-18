@@ -8,7 +8,7 @@ import lejos.hardware.motor.EV3LargeRegulatedMotor;
 import lejos.robotics.SampleProvider;
 import lejos.robotics.localization.OdometryPoseProvider;
 
-public class USLocalizer extends Thread{
+public class USLocalizer extends Thread implements UltrasonicController{
 
 	public enum LocalizationType{FALLING_EDGE, RISING_EDGE};
 
@@ -55,7 +55,7 @@ public class USLocalizer extends Thread{
 	private static final int ROTATE_SPEED = 120;
 	public static int ACCEL = 300;
 
-	public USLocalizer(Odometer odo, SampleProvider usSensor, float[] usData) {
+	public USLocalizer(Odometer odo) {
 		this.odo = odo;
 
 		this.leftMotor = odo.leftMotor;
@@ -81,7 +81,7 @@ public class USLocalizer extends Thread{
 
 	}	
 
-	public void processUSData(int distance) {
+	public void process(int distance) {
 
 		
 		// filter for the crease of the wall

@@ -47,8 +47,8 @@ public class Lab4 {
 		//Setting up the odometer and display
 		Odometer odo = Odometer.getOdometer(leftMotor, rightMotor, WHEEL_BASE, WHEEL_RAD);
 		Display display = new Display(lcd);
-		USLocalizer USLocal = new USLocalizer(odo, usValue, usData);
-		UltrasonicPoller usPoller = new UltrasonicPoller(usSensor, usData, USLocal);
+		USLocalizer USLocal = new USLocalizer(odo);
+		UltrasonicPoller usPoller = new UltrasonicPoller(usSensor, USLocal);
 
 		
 		do {
