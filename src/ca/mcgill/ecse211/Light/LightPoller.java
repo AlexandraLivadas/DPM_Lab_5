@@ -24,8 +24,20 @@ public class LightPoller extends Thread {
 	 * @see java.lang.Thread#run()
 	 */
 	public void run() {
-
-		while (running) {
+		while (cont.isRunning()) {
+			
+			if (cont.getLock() != null) {
+				Object lock = cont.getLock();
+				synchronized(lock) {
+					try {
+						lock.wait();
+					} catch (InterruptedException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
+				}
+			}
+			
 			ls.fetchSample(lsData, 0); // acquire data
 			distance = (int)(lsData[0] * 100.0); // extract from buffer, cast to int
 			cont.process(distance); // now take action depending on value

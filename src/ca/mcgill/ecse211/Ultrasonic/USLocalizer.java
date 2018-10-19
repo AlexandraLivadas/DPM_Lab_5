@@ -1,6 +1,7 @@
 package ca.mcgill.ecse211.Ultrasonic;
 
 import ca.mcgill.ecse211.Lab5.Navigation;
+import ca.mcgill.ecse211.Light.LightLocalizer;
 import ca.mcgill.ecse211.Odometer.Odometer;
 import lejos.hardware.Button;
 import lejos.hardware.Sound;
@@ -28,6 +29,8 @@ public class USLocalizer extends Thread implements UltrasonicController{
 	
 	public static Object done = new Object();
 	
+	
+	public boolean running;
 	
 	private Odometer odo;
 	private Navigation nav;
@@ -73,13 +76,18 @@ public class USLocalizer extends Thread implements UltrasonicController{
 		rightMotor.setSpeed(ROTATE_SPEED);
 //		leftMotor.setAcceleration(ACCEL);
 //		rightMotor.setAcceleration(ACCEL);
-
+		this.running = true;
 	}
 
 	public void setType(LocalizationType type) {
 		this.type = type;
 
 	}	
+
+	@Override
+	public boolean isRunning() {
+		return this.running;
+	}
 
 	public void process(int distance) {
 
@@ -171,11 +179,14 @@ public class USLocalizer extends Thread implements UltrasonicController{
 					//odo.setTheta(nav.normalizeAngle(odo.getXYT()[2]));
 					//odo.setPosition(new double [] {0.0, 0.0, 0.0}, new boolean [] {false, false, true});
 					this.state = LocalizationState.DONE;
-					while (Button.waitForAnyPress() != Button.ID_ENTER);
+					break;	
+				case DONE:
 					synchronized(USLocalizer.done) {
+						LightLocalizer.lock = null;
 						USLocalizer.done.notifyAll();
 					}
-					break;	
+					this.running = false;
+					break;
 				default:
 					break;
 			}
@@ -251,10 +262,13 @@ public class USLocalizer extends Thread implements UltrasonicController{
 					odo.setTheta(0);
 					//odo.setPosition(new double [] {0.0, 0.0, 0.0}, new boolean [] {false, false, true});
 					this.state = LocalizationState.DONE;
-					while (Button.waitForAnyPress() != Button.ID_ENTER);
+					break;
+				case DONE:
 					synchronized(USLocalizer.done) {
+						LightLocalizer.lock = null;
 						USLocalizer.done.notifyAll();
 					}
+					this.running = false;
 					break;
 				default:
 					break;
@@ -267,6 +281,11 @@ public class USLocalizer extends Thread implements UltrasonicController{
 		// that this prevDistance will be initialized
 		this.prevDistance = distance;
 
+	}
+
+	@Override
+	public Object getLock() {
+		return null;
 	}
 
 	private  int convertDistance(double radius, double distance)

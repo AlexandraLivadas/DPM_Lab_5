@@ -26,7 +26,7 @@ public class Navigation extends Thread{
 		this.rightMotor = odo.rightMotor;
 	}
 	
-	void travelTo(double navX, double navY) {
+	public void travelTo(double navX, double navY) {
 
 //		UltrasonicPoller usPoller = null;
 //		if (UltrasonicPoller.getInstance() != null) {
@@ -113,7 +113,7 @@ public class Navigation extends Thread{
 		Sound.twoBeeps();
 	}
 	
-	void turnTo(double currTheta, double destTheta) {
+	public void turnTo(double currTheta, double destTheta) {
 		// get theta difference
 		double deltaTheta = destTheta - currTheta;
 		// normalize theta (get minimum value)
