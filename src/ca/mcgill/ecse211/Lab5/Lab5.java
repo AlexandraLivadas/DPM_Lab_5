@@ -20,7 +20,7 @@ import lejos.hardware.sensor.SensorModes;
 import lejos.hardware.sensor.UARTSensor;
 import lejos.robotics.SampleProvider;
 
-public class Lab4 {
+public class Lab5 {
 
 	private static final EV3LargeRegulatedMotor leftMotor = new EV3LargeRegulatedMotor(LocalEV3.get().getPort("A"));
 	private static final EV3LargeRegulatedMotor rightMotor = new EV3LargeRegulatedMotor(LocalEV3.get().getPort("D"));
@@ -32,7 +32,6 @@ public class Lab4 {
 	public static UARTSensor usSensor = new EV3UltrasonicSensor(usPort);
 	public static SampleProvider usValue = usSensor.getMode("Distance");
 
-
 	//Setting up light sensor
 
 	public static UARTSensor lsSensor = new EV3ColorSensor(lsPort);
@@ -42,7 +41,17 @@ public class Lab4 {
 
 	public static final double WHEEL_RAD = 2.2;
 	public static final double WHEEL_BASE = 10.05;
+	public static final double TILE_SIZE = 30.48;
+	
+	public enum RingColors{BLUE, GREEN, YELLOW, ORANGE};
+	
+	public static final int startOption = 2;
+	public static final double[] startCorner = {3.0, 3.0};
+	public static final double[] endCorner = {7.0, 7.0};
+	public static final RingColors targetRing = RingColors.BLUE;
 
+	
+	
 
 	public static void main(String[] args) throws OdometerExceptions {
 		// init thread to exit application
@@ -59,12 +68,13 @@ public class Lab4 {
 
 		//Setting up the odometer and display
 		Odometer odo = Odometer.getOdometer(leftMotor, rightMotor, WHEEL_BASE, WHEEL_RAD);
+		Navigation nav = new Navigation(odo, leftMotor, rightMotor, WHEEL_RAD, WHEEL_BASE, TILE_SIZE);
 		Display display = new Display(lcd);
 		USLocalizer USLocal = new USLocalizer(odo);
-		UltrasonicPoller usPoller = new UltrasonicPoller(usSensor, USLocal);
-		LightLocalizer LSLocal = new LightLocalizer(odo);
+		UltrasonicPoller usPoller = new UltrasonicPoller(usValue, USLocal);
+		LightLocalizer LSLocal = new LightLocalizer(odo, nav);
 		LightLocalizer.lock = USLocalizer.done;
-		LightPoller lsPoller = new LightPoller(lsSensor, LSLocal);
+		LightPoller lsPoller = new LightPoller(lsValue, LSLocal);
 		
 
 
@@ -112,7 +122,35 @@ public class Lab4 {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-
+		
+		// set position according to startOption
+		switch(startOption) {
+		case 1:
+			odo.setXYT(6*TILE_SIZE, 0, 270);
+			break;
+		case 3:
+			odo.setXYT(0, 6*TILE_SIZE, 90);
+			break;
+		case 2:
+			odo.setXYT(6*TILE_SIZE, 6*TILE_SIZE, 180);
+			break;
+		}
+		double[] xyt = odo.getXYT();
+		
+		nav.travelTo(xyt[0]/TILE_SIZE, startCorner[1]);
+		nav.travelTo(startCorner[0],startCorner[1]);
+		while (Button.waitForAnyPress() != Button.ID_ENTER);
+		Thread navThread  = new Thread(nav);
+		navThread.start();
+		
+		try {
+			navThread.join();
+		} catch (InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
+		nav.turnTo(odo.getXYT()[2], 0);
 
 	}
 }

@@ -37,9 +37,9 @@ public class LightLocalizer implements LightController{
 	public LocalizationState state = LocalizationState.INIT;
 
 
-	public LightLocalizer(Odometer odo) {
+	public LightLocalizer(Odometer odo, Navigation nav) {
 		this.odo = odo;
-		this.nav = new Navigation(odo);
+		this.nav = nav;
 		this.firstReading = -1;
 		this.lineCount = 0;
 		this.lineAngles = new double[4];
@@ -136,9 +136,8 @@ public class LightLocalizer implements LightController{
 
 			odo.setXYT(correctedX, correctedY, -deltaTheta);	
 
-			nav.travelTo(0, 0);
+			nav.syncTravelTo(0, 0);
 			nav.turnTo(odo.getXYT()[2], 0);
-
 			this.state = LocalizationState.DONE;
 			break;
 		case DONE:

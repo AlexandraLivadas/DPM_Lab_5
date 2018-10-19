@@ -33,7 +33,6 @@ public class USLocalizer extends Thread implements UltrasonicController{
 	public boolean running;
 	
 	private Odometer odo;
-	private Navigation nav;
 	private LocalizationType type;
 	private LocalizationState state;
 	private EV3LargeRegulatedMotor leftMotor;
@@ -64,7 +63,6 @@ public class USLocalizer extends Thread implements UltrasonicController{
 		this.leftMotor = odo.leftMotor;
 		this.rightMotor = odo.rightMotor;
 		prevDistance = 50;
-		this.nav = new Navigation(odo);
 		this.state = LocalizationState.RESET;
 		
 		this.filterControl = 0;
