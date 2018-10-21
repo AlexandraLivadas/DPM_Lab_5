@@ -40,14 +40,14 @@ public class Lab5 {
 	private static final TextLCD lcd = LocalEV3.get().getTextLCD();
 
 	public static final double WHEEL_RAD = 2.2;
-	public static final double WHEEL_BASE = 10.05;
+	public static final double WHEEL_BASE = 10.55;
 	public static final double TILE_SIZE = 30.48;
 	
 	public enum RingColors{BLUE, GREEN, YELLOW, ORANGE};
 	
-	public static final int startOption = 2;
-	public static final double[] startCorner = {3.0, 3.0};
-	public static final double[] endCorner = {7.0, 7.0};
+	public static final int startOption = 3;
+	public static final double[] startCorner = {1.0, 1.0};
+	public static final double[] endCorner = {3.0, 3.0};
 	public static final RingColors targetRing = RingColors.BLUE;
 
 	
@@ -137,9 +137,8 @@ public class Lab5 {
 		}
 		double[] xyt = odo.getXYT();
 		
-		nav.travelTo(xyt[0]/TILE_SIZE, startCorner[1]);
-		nav.travelTo(startCorner[0],startCorner[1]);
-		while (Button.waitForAnyPress() != Button.ID_ENTER);
+		nav.travelTo(xyt[0]/TILE_SIZE, startCorner[1] - 1);
+		nav.travelTo(startCorner[0] - 1, startCorner[1] - 1);
 		Thread navThread  = new Thread(nav);
 		navThread.start();
 		
@@ -151,6 +150,42 @@ public class Lab5 {
 		}
 		
 		nav.turnTo(odo.getXYT()[2], 0);
+		
+		
+		// find ring part
+		
+		// spiral code
+		initSpiral(nav, startCorner, endCorner);
+		navThread = new Thread(nav);
+		navThread.start();
+		
+		try {
+			navThread.join();
+		} catch (InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
 
+	}
+	
+	public static void initSpiral(Navigation nav, double[] Ll, double[] Rr) {
+		double x, X, y, Y;
+		
+		x = Ll[0];
+		X = Rr[0];
+		y = Ll[1];
+		Y = Rr[1];
+		
+		while(X>x && Y>y) {
+			nav.travelTo(x, Y);
+			x++;
+			nav.travelTo(X, Y);
+			Y--;
+			nav.travelTo(X, y);
+			X--;
+			nav.travelTo(x, y);
+			y++;	
+		}
 	}
 }

@@ -55,7 +55,6 @@ public class Navigation extends Thread{
 		while (!this._coordsList.isEmpty()) {
 			double[] coords = this._coordsList.remove(0);
 			this._travelTo(coords[0], coords[1]);
-			while (Button.waitForAnyPress() != Button.ID_ENTER);
 		}
 	}
 	
