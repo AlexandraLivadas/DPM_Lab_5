@@ -3,6 +3,8 @@ package ca.mcgill.ecse211.Lab5;
 import ca.mcgill.ecse211.Ultrasonic.USLocalizer;
 import ca.mcgill.ecse211.Ultrasonic.USLocalizer.LocalizationType;
 import ca.mcgill.ecse211.Ultrasonic.UltrasonicPoller;
+import ca.mcgill.ecse211.Color.ColorClassifier;
+import ca.mcgill.ecse211.Color.ColorPoller;
 import ca.mcgill.ecse211.Light.LightLocalizer;
 import ca.mcgill.ecse211.Light.LightPoller;
 import ca.mcgill.ecse211.Odometer.Odometer;
@@ -27,6 +29,7 @@ public class Lab5 {
 
 	private static final Port usPort = LocalEV3.get().getPort("S4");
 	private static final Port lsPort = LocalEV3.get().getPort("S1");
+	private static final Port csPort = LocalEV3.get().getPort("S3");
 
 	//Setting up ultrasonic sensor
 	public static UARTSensor usSensor = new EV3UltrasonicSensor(usPort);
@@ -36,6 +39,10 @@ public class Lab5 {
 
 	public static UARTSensor lsSensor = new EV3ColorSensor(lsPort);
 	public static SampleProvider lsValue = lsSensor.getMode("Red");
+	
+	//Setting up color sensor
+	public static EV3ColorSensor csSensor = new EV3ColorSensor(csPort);
+	public static SampleProvider csValue = csSensor.getRGBMode();
 
 	private static final TextLCD lcd = LocalEV3.get().getTextLCD();
 
@@ -75,6 +82,8 @@ public class Lab5 {
 		LightLocalizer LSLocal = new LightLocalizer(odo, nav);
 		LightLocalizer.lock = USLocalizer.done;
 		LightPoller lsPoller = new LightPoller(lsValue, LSLocal);
+		ColorClassifier CSLocal = new ColorClassifier(odo, nav, targetRing);
+		ColorPoller csPoller = new ColorPoller(csValue, CSLocal);
 		
 
 
@@ -103,54 +112,60 @@ public class Lab5 {
 			USLocal.setType(LocalizationType.RISING_EDGE);
 		}
 		
-		// Start odometer and display threads
-		Thread odoThread = new Thread(odo);
-		odoThread.start();
-		Thread displayThread = new Thread(display);
-		displayThread.start();
-		Thread usPollerThread = new Thread(usPoller);
-		usPollerThread.start();
-		Thread lsPollerThread = new Thread(lsPoller);
-		lsPollerThread.start();
+		Thread csPollerThread = new Thread(csPoller);
+		csPollerThread.start();
 		
-		try {
-			usPollerThread.join();
-			lsPollerThread.join();
-			usSensor.close();
-			lsSensor.close();
-		} catch (InterruptedException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+//		// Start odometer and display threads
+//		Thread odoThread = new Thread(odo);
+//		odoThread.start();
+//		Thread displayThread = new Thread(display);
+//		displayThread.start();
+//		Thread usPollerThread = new Thread(usPoller);
+//		usPollerThread.start();
+//		Thread lsPollerThread = new Thread(lsPoller);
+//		lsPollerThread.start();
+//		
+//		try {
+//			usPollerThread.join();
+//			lsPollerThread.join();
+//			usSensor.close();
+//			lsSensor.close();
+//		} catch (InterruptedException e) {
+//			// TODO Auto-generated catch block
+//			e.printStackTrace();
+//		}
+//		
+//		// set position according to startOption
+//		switch(startOption) {
+//		case 1:
+//			odo.setXYT(6*TILE_SIZE, 0, 270);
+//			break;
+//		case 3:
+//			odo.setXYT(0, 6*TILE_SIZE, 90);
+//			break;
+//		case 2:
+//			odo.setXYT(6*TILE_SIZE, 6*TILE_SIZE, 180);
+//			break;
+//		}
+//		double[] xyt = odo.getXYT();
+//		
+//		nav.travelTo(xyt[0]/TILE_SIZE, startCorner[1]);
+//		nav.travelTo(startCorner[0],startCorner[1]);
+//		while (Button.waitForAnyPress() != Button.ID_ENTER);
+//		Thread navThread  = new Thread(nav);
+//		navThread.start();
+//		
+//		try {
+//			navThread.join();
+//		} catch (InterruptedException e) {
+//			// TODO Auto-generated catch block
+//			e.printStackTrace();
+//		}
+//		
+//		nav.turnTo(odo.getXYT()[2], 0);
 		
-		// set position according to startOption
-		switch(startOption) {
-		case 1:
-			odo.setXYT(6*TILE_SIZE, 0, 270);
-			break;
-		case 3:
-			odo.setXYT(0, 6*TILE_SIZE, 90);
-			break;
-		case 2:
-			odo.setXYT(6*TILE_SIZE, 6*TILE_SIZE, 180);
-			break;
-		}
-		double[] xyt = odo.getXYT();
-		
-		nav.travelTo(xyt[0]/TILE_SIZE, startCorner[1]);
-		nav.travelTo(startCorner[0],startCorner[1]);
-		while (Button.waitForAnyPress() != Button.ID_ENTER);
-		Thread navThread  = new Thread(nav);
-		navThread.start();
-		
-		try {
-			navThread.join();
-		} catch (InterruptedException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		
-		nav.turnTo(odo.getXYT()[2], 0);
+//		Thread csPollerThread = new Thread(csPoller);
+//		csPollerThread.start();
 
 	}
 }
