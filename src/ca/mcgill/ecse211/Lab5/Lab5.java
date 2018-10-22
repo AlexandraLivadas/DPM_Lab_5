@@ -4,6 +4,8 @@ import ca.mcgill.ecse211.Ultrasonic.USDetector;
 import ca.mcgill.ecse211.Ultrasonic.USLocalizer;
 import ca.mcgill.ecse211.Ultrasonic.USLocalizer.LocalizationType;
 import ca.mcgill.ecse211.Ultrasonic.UltrasonicPoller;
+import ca.mcgill.ecse211.Color.ColorClassifier;
+import ca.mcgill.ecse211.Color.ColorPoller;
 import ca.mcgill.ecse211.Light.LightLocalizer;
 import ca.mcgill.ecse211.Light.LightPoller;
 import ca.mcgill.ecse211.Odometer.Odometer;
@@ -29,6 +31,7 @@ public class Lab5 {
 	private static final Port usPort = LocalEV3.get().getPort("S4");
 	private static final Port usPort2 = LocalEV3.get().getPort("S2");
 	private static final Port lsPort = LocalEV3.get().getPort("S1");
+	private static final Port csPort = LocalEV3.get().getPort("S3");
 
 	//Setting up ultrasonic sensor
 	public static UARTSensor usSensor = new EV3UltrasonicSensor(usPort);
@@ -42,6 +45,9 @@ public class Lab5 {
 
 	public static UARTSensor lsSensor = new EV3ColorSensor(lsPort);
 	public static SampleProvider lsValue = lsSensor.getMode("Red");
+	
+	public static EV3ColorSensor csSensor = new EV3ColorSensor(csPort);
+	public static SampleProvider csValue = csSensor.getRGBMode();
 
 	private static final TextLCD lcd = LocalEV3.get().getTextLCD();
 
@@ -81,10 +87,8 @@ public class Lab5 {
 		LightLocalizer LSLocal = new LightLocalizer(odo, nav);
 		LightLocalizer.lock = USLocalizer.done;
 		LightPoller lsPoller = new LightPoller(lsValue, LSLocal);
-		
-			
-
-		
+		ColorClassifier CSLocal = new ColorClassifier(odo, nav, targetRing);
+		ColorPoller csPoller = new ColorPoller(csValue, CSLocal);
 
 
 		do {
@@ -112,9 +116,12 @@ public class Lab5 {
 			USLocal.setType(LocalizationType.RISING_EDGE);
 		}
 		
+		Thread csPollerThread = new Thread(csPoller);
+		csPollerThread.start();
+		
 		// Start odometer and display threads
-		Thread odoThread = new Thread(odo);
-		odoThread.start();
+//		Thread odoThread = new Thread(odo);
+//		odoThread.start();
 		Thread displayThread = new Thread(display);
 		displayThread.start();
 //		Thread usPollerThread = new Thread(usPoller);
@@ -164,47 +171,48 @@ public class Lab5 {
 		// find ring part
 		
 		// spiral code
-		USDetector USDetect = new USDetector();
-		UltrasonicPoller usPoller2 = new UltrasonicPoller(usValue2, USDetect);
+//		USDetector USDetect = new USDetector();
+//		UltrasonicPoller usPoller2 = new UltrasonicPoller(usValue2, USDetect);
 		
 		
 		
-		initSpiral(nav, startCorner, endCorner);
-		Thread navThread = new Thread(nav);
-		navThread.start();
-		Thread usPollerThread2 = new Thread(usPoller2);
-		usPollerThread2.start();
-		
-		
-		try {
-			navThread.join();
-			usPollerThread2.join();
-		} catch (InterruptedException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		
-
-	}
-	
-	public static void initSpiral(Navigation nav, double[] Ll, double[] Rr) {
-		double x, X, y, Y;
-		
-		x = Ll[0] - 0.5;
-		X = Rr[0] + 0.5;
-		y = Ll[1] - 0.5;
-		Y = Rr[1] + 0.5;
-		
-		nav.travelTo(x, y);
-		while(X>x && Y>y) {
-			nav.travelTo(x, Y);
-			x++;
-			nav.travelTo(X, Y);
-			Y--;
-			nav.travelTo(X, y);
-			X--;
-			nav.travelTo(x, y);
-			y++;	
-		}
-	}
+//		initSpiral(nav, startCorner, endCorner);
+//		Thread navThread = new Thread(nav);
+//		navThread.start();
+//		Thread usPollerThread2 = new Thread(usPoller2);
+//		usPollerThread2.start();
+//		
+//		
+//		try {
+//			navThread.join();
+//			usPollerThread2.join();
+//		} catch (InterruptedException e) {
+//			// TODO Auto-generated catch block
+//			e.printStackTrace();
+//		}
+//		
+//
+//	}
+//	
+//	public static void initSpiral(Navigation nav, double[] Ll, double[] Rr) {
+//		double x, X, y, Y;
+//		
+//		x = Ll[0] - 0.5;
+//		X = Rr[0] + 0.5;
+//		y = Ll[1] - 0.5;
+//		Y = Rr[1] + 0.5;
+//		
+//		nav.travelTo(x, y);
+//		while(X>x && Y>y) {
+//			nav.travelTo(x, Y);
+//			x++;
+//			nav.travelTo(X, Y);
+//			Y--;
+//			nav.travelTo(X, y);
+//			X--;
+//			nav.travelTo(x, y);
+//			y++;	
+//		}
+//	}
+}
 }

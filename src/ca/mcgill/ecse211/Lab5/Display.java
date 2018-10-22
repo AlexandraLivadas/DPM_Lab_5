@@ -2,6 +2,8 @@ package ca.mcgill.ecse211.Lab5;
 
 import java.text.DecimalFormat;
 
+import ca.mcgill.ecse211.Color.ColorClassifier;
+import ca.mcgill.ecse211.Color.ColorPoller;
 import ca.mcgill.ecse211.Odometer.Odometer;
 import ca.mcgill.ecse211.Odometer.OdometerExceptions;
 import ca.mcgill.ecse211.Ultrasonic.USLocalizer;
@@ -16,6 +18,8 @@ public class Display extends Thread implements Runnable {
 
 	  private Odometer odo;
 	  private UltrasonicPoller usPoller;
+	  private ColorClassifier color;
+	  private ColorPoller csPoller;
 	  private TextLCD lcd;
 	  private double[] position;
 	  private final long DISPLAY_PERIOD = 25;
@@ -56,23 +60,28 @@ public class Display extends Thread implements Runnable {
 	      // Retrieve x, y and Theta information
 	      position = odo.getXYT();
 	     
-	      
+		     
+	      if (ColorClassifier.detectedRing != null) {
+		      lcd.drawString(ColorClassifier.detectedRing.toString(), 0, 1);
+		      if (ColorClassifier.targetDetected)
+		    	  lcd.drawString("Target Detected!", 0, 2);
+	      }
 	      
 	      
 	      // Print x,y, and theta information
-	      DecimalFormat numberFormat = new DecimalFormat("######0.00");
-	      lcd.drawString("X: " + numberFormat.format(odo.getXYT()[0]), 0, 0);
-	      lcd.drawString("Y: " + numberFormat.format(odo.getXYT()[1]), 0, 1);
-	      lcd.drawString("T: " + numberFormat.format(odo.getXYT()[2]), 0, 2);
-	      
-	      if (usPoller != null) {
-	          lcd.drawString("Distance: " + numberFormat.format(usPoller.distance), 0, 3);
-	          //lcd.drawString("DMR: " + numberFormat.format(usPoller.getController().dotMagnitudeRatio), 0, 4);
-	      }
-	      
-	      lcd.drawString("Nav X: " + numberFormat.format(Navigation.destX), 0, 5);
-	      lcd.drawString("Nav Y: " + numberFormat.format(Navigation.destY), 0, 6);
-	      lcd.drawString("Nav T: " + numberFormat.format(Navigation.destT), 0, 7);
+//	      DecimalFormat numberFormat = new DecimalFormat("######0.00");
+//	      lcd.drawString("X: " + numberFormat.format(odo.getXYT()[0]), 0, 0);
+//	      lcd.drawString("Y: " + numberFormat.format(odo.getXYT()[1]), 0, 1);
+//	      lcd.drawString("T: " + numberFormat.format(odo.getXYT()[2]), 0, 2);
+//	      
+//	      if (usPoller != null) {
+//	          lcd.drawString("Distance: " + numberFormat.format(usPoller.distance), 0, 3);
+//	          //lcd.drawString("DMR: " + numberFormat.format(usPoller.getController().dotMagnitudeRatio), 0, 4);
+//	      }
+//	      
+//	      lcd.drawString("Nav X: " + numberFormat.format(Navigation.destX), 0, 5);
+//	      lcd.drawString("Nav Y: " + numberFormat.format(Navigation.destY), 0, 6);
+//	      lcd.drawString("Nav T: " + numberFormat.format(Navigation.destT), 0, 7);
 	      
 //	      lcd.drawString("Theta A: " + numberFormat.format(USLocalizer.thetaA), 0, 5);
 //	      lcd.drawString("Theta B: " + numberFormat.format(USLocalizer.thetaB), 0, 6);
