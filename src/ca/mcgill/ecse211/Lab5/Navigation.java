@@ -11,8 +11,8 @@ public class Navigation extends Thread{
 
 	private EV3LargeRegulatedMotor leftMotor;
 	private EV3LargeRegulatedMotor rightMotor;
-	private static final int FORWARD_SPEED = 250;
-	private static final int ROTATE_SPEED = 150;
+	private static final int FORWARD_SPEED = 200;
+	private static final int ROTATE_SPEED = 130;
 	private final double WHEEL_RAD;
 	private final double WHEEL_BASE;
 	private final double TILE_SIZE;
@@ -26,6 +26,8 @@ public class Navigation extends Thread{
 	
 	private ArrayList<double[]> _coordsList;
 	private boolean isNavigating;
+	
+	private volatile boolean running;
 
 	public Navigation(Odometer odo, EV3LargeRegulatedMotor leftMotor, EV3LargeRegulatedMotor rightMotor, 
 			final double WHEEL_RAD, final double WHEEL_BASE, double tileSize) {
@@ -52,15 +54,18 @@ public class Navigation extends Thread{
 
 	//The run method runs through the _coordsList and travels through the points
 	public void run() {
+		this.running = true;
 		while (!this._coordsList.isEmpty()) {
+			if (!this.isRunning()) {
+				break;
+			}
 			double[] coords = this._coordsList.remove(0);
 			this._travelTo(coords[0], coords[1]);
 		}
+		this.running = false;
 	}
 	
 	boolean _travelTo(double navX, double navY) {
-		
-		
 		
 		// get current coordinates
 		double xyt[] = odometer.getXYT();
@@ -115,6 +120,8 @@ public class Navigation extends Thread{
 
 			// This is only relevant if the ultrasonic poller thread is being used
 			if (lock != null) {
+				leftMotor.stop(true);
+				rightMotor.stop(false);
 				synchronized(lock) {
 					try {
 						lock.wait();
@@ -125,7 +132,15 @@ public class Navigation extends Thread{
 					}
 				}
 			}
-
+			
+			// stop the navigation entirely
+			if (!running) {
+				leftMotor.stop(true);
+				rightMotor.stop(false);
+				this._coordsList.add(0, new double[] {navX, navY});
+				return false;
+			}
+ 
 			try {
 				Thread.sleep(20);
 			} catch (InterruptedException e) {
@@ -142,7 +157,7 @@ public class Navigation extends Thread{
 	}
 
 	public void syncTravelTo(double navX, double navY) {
-		_travelTo(navX, navY);
+		_travelTo(navX*TILE_SIZE, navY*TILE_SIZE);
 	}
 	
 	//	This method causes the robot to turn (on point) to the absolute heading theta. This method
@@ -184,11 +199,24 @@ public class Navigation extends Thread{
 		return theta;
 	}
 
-
+	
+	
 	boolean isNavigating() {
 		return isNavigating;
 	}
 
+	public boolean isRunning() {
+		return running;
+	}
+
+	public void setRunning(boolean running) {
+		this.running = running;
+	}
+	
+	public void clearCoordList() {
+		this._coordsList.clear();
+	}
+	
 	/**
 	 * This method allows the conversion of a distance to the total rotation of each wheel need to
 	 * cover that distance.

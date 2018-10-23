@@ -59,20 +59,19 @@ public class Display extends Thread implements Runnable {
 
 	      // Retrieve x, y and Theta information
 	      position = odo.getXYT();
-	     
 		     
 	      if (ColorClassifier.detectedRing != null) {
-		      lcd.drawString(ColorClassifier.detectedRing.toString(), 0, 1);
+		      lcd.drawString(ColorClassifier.detectedRing.toString(), 0, 3);
 		      if (ColorClassifier.targetDetected)
-		    	  lcd.drawString("Target Detected!", 0, 2);
+		    	  lcd.drawString("Target Detected!", 0, 4);
 	      }
 	      
 	      
 	      // Print x,y, and theta information
-//	      DecimalFormat numberFormat = new DecimalFormat("######0.00");
-//	      lcd.drawString("X: " + numberFormat.format(odo.getXYT()[0]), 0, 0);
-//	      lcd.drawString("Y: " + numberFormat.format(odo.getXYT()[1]), 0, 1);
-//	      lcd.drawString("T: " + numberFormat.format(odo.getXYT()[2]), 0, 2);
+	      DecimalFormat numberFormat = new DecimalFormat("######0.00");
+	      lcd.drawString("X: " + numberFormat.format(odo.getXYT()[0]), 0, 0);
+	      lcd.drawString("Y: " + numberFormat.format(odo.getXYT()[1]), 0, 1);
+	      lcd.drawString("T: " + numberFormat.format(odo.getXYT()[2]), 0, 2);
 //	      
 //	      if (usPoller != null) {
 //	          lcd.drawString("Distance: " + numberFormat.format(usPoller.distance), 0, 3);

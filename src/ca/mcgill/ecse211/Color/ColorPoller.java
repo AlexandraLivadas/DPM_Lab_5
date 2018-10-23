@@ -39,11 +39,20 @@ public class ColorPoller extends Thread {
 				}
 			}
 			
-			
 			cs.fetchSample(csData, 0); // acquire data
 			rgbValues[0] = csData[0]; // extract from buffer, cast to int
 			rgbValues[1] = csData[1]; // extract from buffer, cast to int
 			rgbValues[2] = csData[2]; // extract from buffer, cast to int
+			
+			float unitRGB = (float)Math.sqrt(
+					Math.pow(rgbValues[0], 2) +
+					Math.pow(rgbValues[1], 2) + 
+					Math.pow(rgbValues[2], 2));
+			
+			rgbValues[0] /= unitRGB; // extract from buffer, cast to int
+			rgbValues[1] /= unitRGB; // extract from buffer, cast to int
+			rgbValues[2] /= unitRGB; // extract from buffer, cast to int
+			
 			cont.process(rgbValues); // now take action depending on value
 			try {
 				Thread.sleep(15);

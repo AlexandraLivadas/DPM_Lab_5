@@ -5,6 +5,7 @@ import ca.mcgill.ecse211.Ultrasonic.USLocalizer;
 import ca.mcgill.ecse211.Ultrasonic.USLocalizer.LocalizationType;
 import ca.mcgill.ecse211.Ultrasonic.UltrasonicPoller;
 import ca.mcgill.ecse211.Color.ColorClassifier;
+import ca.mcgill.ecse211.Color.ColorClassifier.RingColors;
 import ca.mcgill.ecse211.Color.ColorPoller;
 import ca.mcgill.ecse211.Light.LightLocalizer;
 import ca.mcgill.ecse211.Light.LightPoller;
@@ -29,7 +30,7 @@ public class Lab5 {
 	private static final EV3LargeRegulatedMotor rightMotor = new EV3LargeRegulatedMotor(LocalEV3.get().getPort("D"));
 
 	private static final Port usPort = LocalEV3.get().getPort("S4");
-	private static final Port usPort2 = LocalEV3.get().getPort("S2");
+//	private static final Port usPort2 = LocalEV3.get().getPort("S2");
 	private static final Port lsPort = LocalEV3.get().getPort("S1");
 	private static final Port csPort = LocalEV3.get().getPort("S3");
 
@@ -38,8 +39,8 @@ public class Lab5 {
 	public static SampleProvider usValue = usSensor.getMode("Distance");
 
 	//Setting up ultrasonic sensor 2
-	public static UARTSensor usSensor2 = new EV3UltrasonicSensor(usPort2);
-	public static SampleProvider usValue2 = usSensor2.getMode("Distance");
+//	public static UARTSensor usSensor2 = new EV3UltrasonicSensor(usPort2);
+//	public static SampleProvider usValue2 = usSensor2.getMode("Distance");
 	
 	//Setting up light sensor
 
@@ -52,15 +53,13 @@ public class Lab5 {
 	private static final TextLCD lcd = LocalEV3.get().getTextLCD();
 
 	public static final double WHEEL_RAD = 2.2;
-	public static final double WHEEL_BASE = 10.55;
+	public static final double WHEEL_BASE = 10.40;
 	public static final double TILE_SIZE = 30.48;
 	
-	public enum RingColors{BLUE, GREEN, YELLOW, ORANGE};
-	
 	public static final int startOption = 3;
-	public static final double[] startCorner = {1.0, 1.0};
-	public static final double[] endCorner = {3.0, 3.0};
-	public static final RingColors targetRing = RingColors.BLUE;
+	public static final double[] startCorner = {2.0, 2.0};
+	public static final double[] endCorner = {6.0, 6.0};
+	public static final RingColors targetRing = RingColors.ORANGE;
 
 	
 	
@@ -87,9 +86,11 @@ public class Lab5 {
 		LightLocalizer LSLocal = new LightLocalizer(odo, nav);
 		LightLocalizer.lock = USLocalizer.done;
 		LightPoller lsPoller = new LightPoller(lsValue, LSLocal);
+		
+		
 		ColorClassifier CSLocal = new ColorClassifier(odo, nav, targetRing);
 		ColorPoller csPoller = new ColorPoller(csValue, CSLocal);
-
+		double[] xyt;
 
 		do {
 			// clear the display
@@ -116,56 +117,53 @@ public class Lab5 {
 			USLocal.setType(LocalizationType.RISING_EDGE);
 		}
 		
-		Thread csPollerThread = new Thread(csPoller);
-		csPollerThread.start();
-		
 		// Start odometer and display threads
-//		Thread odoThread = new Thread(odo);
-//		odoThread.start();
+		Thread odoThread = new Thread(odo);
+		odoThread.start();
 		Thread displayThread = new Thread(display);
 		displayThread.start();
-//		Thread usPollerThread = new Thread(usPoller);
-//		usPollerThread.start();
-//		Thread lsPollerThread = new Thread(lsPoller);
-//		lsPollerThread.start();
-//		
-//		try {
-//			usPollerThread.join();
-//			lsPollerThread.join();
-//			usSensor.close();
-//			lsSensor.close();
-//		} catch (InterruptedException e) {
-//			// TODO Auto-generated catch block
-//			e.printStackTrace();
-//		}
-//		
-//		// set position according to startOption
-//		switch(startOption) {
-//		case 1:
-//			odo.setXYT(6*TILE_SIZE, 0, 270);
-//			break;
-//		case 3:
-//			odo.setXYT(0, 6*TILE_SIZE, 90);
-//			break;
-//		case 2:
-//			odo.setXYT(6*TILE_SIZE, 6*TILE_SIZE, 180);
-//			break;
-//		}
-//		double[] xyt = odo.getXYT();
-//		
-//		nav.travelTo(xyt[0]/TILE_SIZE, startCorner[1] - 1);
-//		nav.travelTo(startCorner[0] - 1, startCorner[1] - 1);
-//		Thread navThread  = new Thread(nav);
-//		navThread.start();
-//		
-//		try {
-//			navThread.join();
-//		} catch (InterruptedException e) {
-//			// TODO Auto-generated catch block
-//			e.printStackTrace();
-//		}
-//		
-//		nav.turnTo(odo.getXYT()[2], 0);
+		Thread usPollerThread = new Thread(usPoller);
+		usPollerThread.start();
+		Thread lsPollerThread = new Thread(lsPoller);
+		lsPollerThread.start();
+		
+		try {
+			usPollerThread.join();
+			lsPollerThread.join();
+			usSensor.close();
+			lsSensor.close();
+		} catch (InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
+		// set position according to startOption
+		switch(startOption) {
+		case 1:
+			odo.setXYT(6*TILE_SIZE, 0, 270);
+			break;
+		case 3:
+			odo.setXYT(0, 6*TILE_SIZE, 90);
+			break;
+		case 2:
+			odo.setXYT(6*TILE_SIZE, 6*TILE_SIZE, 180);
+			break;
+		}
+		xyt = odo.getXYT();
+		
+		nav.travelTo(xyt[0]/TILE_SIZE, startCorner[1] - 1);
+		nav.travelTo(startCorner[0] - 1, startCorner[1] - 1);
+		Thread navThread  = new Thread(nav);
+		navThread.start();
+		
+		try {
+			navThread.join();
+		} catch (InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
+		nav.turnTo(odo.getXYT()[2], 0);
 		
 		
 		// find ring part
@@ -176,43 +174,63 @@ public class Lab5 {
 		
 		
 		
-//		initSpiral(nav, startCorner, endCorner);
-//		Thread navThread = new Thread(nav);
-//		navThread.start();
+		initSpiral(nav, startCorner, endCorner);
+		Thread csPollerThread = new Thread(csPoller);
+		csPollerThread.start();
+		navThread = new Thread(nav);
+		navThread.start();
 //		Thread usPollerThread2 = new Thread(usPoller2);
 //		usPollerThread2.start();
 //		
 //		
-//		try {
-//			navThread.join();
+		try {
+			navThread.join();
+			csPollerThread.join();
+			csSensor.close();
 //			usPollerThread2.join();
-//		} catch (InterruptedException e) {
-//			// TODO Auto-generated catch block
-//			e.printStackTrace();
-//		}
-//		
-//
-//	}
-//	
-//	public static void initSpiral(Navigation nav, double[] Ll, double[] Rr) {
-//		double x, X, y, Y;
-//		
-//		x = Ll[0] - 0.5;
-//		X = Rr[0] + 0.5;
-//		y = Ll[1] - 0.5;
-//		Y = Rr[1] + 0.5;
-//		
-//		nav.travelTo(x, y);
-//		while(X>x && Y>y) {
-//			nav.travelTo(x, Y);
-//			x++;
-//			nav.travelTo(X, Y);
-//			Y--;
-//			nav.travelTo(X, y);
-//			X--;
-//			nav.travelTo(x, y);
-//			y++;	
-//		}
-//	}
-}
+		} catch (InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
+		// found the ring
+		// navigates to the end corner
+		nav.setRunning(true);
+		xyt =  odo.getXYT();
+		if (xyt[2] >= 46 && xyt[2] <= 135) {
+			nav.syncTravelTo(((int)xyt[0]/TILE_SIZE+0.5), xyt[1]/TILE_SIZE );	
+		} else if (xyt[2] >= 136 && xyt[2] <= 225) {
+			nav.syncTravelTo(xyt[0]/TILE_SIZE, ((int)xyt[1]/TILE_SIZE-0.5));	
+		} else if (xyt[2] >= 226 && xyt[2] <= 315) {
+			nav.syncTravelTo(((int)xyt[0]/TILE_SIZE-0.5), xyt[1]/TILE_SIZE );	
+		} else {
+			nav.syncTravelTo(xyt[0]/TILE_SIZE, ((int)xyt[1]/TILE_SIZE+0.5));
+		}
+		
+		nav.syncTravelTo(endCorner[0]+0.5, odo.getXYT()[1]/TILE_SIZE);	
+		nav.syncTravelTo(endCorner[0]+0.5, endCorner[1]);	
+		nav.syncTravelTo(endCorner[0],  endCorner[1]);	
+
+	}
+	
+	public static void initSpiral(Navigation nav, double[] Ll, double[] Rr) {
+		double x, X, y, Y;
+		
+		x = Ll[0] - 0.5;
+		X = Rr[0] + 0.5;
+		y = Ll[1] - 0.5;
+		Y = Rr[1] + 0.5;
+		
+		nav.travelTo(x, y);
+		while(X>x && Y>y) {
+			nav.travelTo(x, Y);
+			x++;
+			nav.travelTo(X, Y);
+			Y--;
+			nav.travelTo(X, y);
+			X--;
+			nav.travelTo(x, y);
+			y++;	
+		}
+	}
 }

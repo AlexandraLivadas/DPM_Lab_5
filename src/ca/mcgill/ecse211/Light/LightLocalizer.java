@@ -130,9 +130,10 @@ public class LightLocalizer implements LightController{
 			//current theta value
 			//540 was used for deltaThetaY instead of 270 as an offset for more accurate calculations
 			deltaThetaX = (270 + (thetaX/2) - lineAngles[3]) % 360;
+			deltaThetaY = (540 + (thetaY/2) - lineAngles[0]) % 360;
 
 			//Getting the average of the two values gave a more accurate result
-			deltaTheta = (deltaThetaX);
+			deltaTheta = (deltaThetaX + deltaThetaY)/2.0;
 
 			odo.setXYT(correctedX, correctedY, -deltaTheta);	
 
