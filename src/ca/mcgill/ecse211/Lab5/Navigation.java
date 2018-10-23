@@ -107,7 +107,7 @@ public class Navigation extends Thread{
 
 		// turn to the correct direction
 		this._turnTo(theta, deltaTheta);
-		Sound.beep();
+//		Sound.beep();
 		// correct angle with gyro
 		if (this.gyro != null) {
 			float theta = this.gyro.getTheta();
@@ -136,6 +136,7 @@ public class Navigation extends Thread{
 			//If the difference between the current x/y and the x/y we started from is similar to the deltaX/deltaY, 
 			//Stop the motors because the point has been reached
 			if (Math.pow(newX - x, 2) + Math.pow(newY - y, 2) >= Math.pow(absDeltaX, 2) + Math.pow(absDeltaY, 2)) {
+				this.odometer.update(-(newX - x)*0.079, -(newY - y)*0.079 , 0);
 				break;
 			}
 
@@ -173,7 +174,7 @@ public class Navigation extends Thread{
 		leftMotor.stop(true);
 		rightMotor.stop(false);
 		this.isNavigating = false;
-		Sound.twoBeeps();
+//		Sound.twoBeeps();
 
 		return true;
 	}

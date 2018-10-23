@@ -34,7 +34,7 @@ public class ColorClassifier implements ColorController{
 	public static RingColors targetRing;
 	public static boolean targetDetected;
 	public static RingColors detectedRing;
-	public static boolean classifyingDemo;
+	public boolean classifyingDemo;
 
 	public static double[] blueRValues = {0.191671, 0.026218};
 	public static double[] blueGValues = {0.593177, 0.043177};
@@ -73,7 +73,10 @@ public class ColorClassifier implements ColorController{
 	public void process(float[] values) {
 		detectedRing = null;
 		RingColors ring = detectColor(values);
-		if (ring != null && detectedRings.indexOf(ring) == -1) {
+		
+		
+		
+		if (ring != null && detectedRings.indexOf(ring) == -1 && !this.classifyingDemo) {
 			detectedRings.add(ring);
 			ColorClassifier.detectedRing = ring;
 			
@@ -91,15 +94,18 @@ public class ColorClassifier implements ColorController{
 				synchronized(lock) {
 					lock.notifyAll();
 				}
-				if (!this.classifyingDemo) {
 				// stopping this thread
-				this.running = false;
-				}
+					this.running = false;
 			} else {
 				Sound.twoBeeps();
 			}
 			
-		}
+		} else if (ring != null && classifyingDemo) {
+			ColorClassifier.detectedRing = ring;
+				//Sound.beep();
+		}	
+		
+		
 	}
 
 
@@ -144,6 +150,6 @@ public class ColorClassifier implements ColorController{
 
 
 	public void setClassifyingDemo(boolean set) {
-		ColorClassifier.classifyingDemo = set;
+		this.classifyingDemo = set;
 	}
 }
