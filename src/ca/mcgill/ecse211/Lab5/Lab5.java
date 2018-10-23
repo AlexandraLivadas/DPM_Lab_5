@@ -6,6 +6,8 @@ import ca.mcgill.ecse211.Ultrasonic.USLocalizer.LocalizationType;
 import ca.mcgill.ecse211.Ultrasonic.UltrasonicPoller;
 import ca.mcgill.ecse211.Color.ColorClassifier;
 import ca.mcgill.ecse211.Color.ColorClassifier.RingColors;
+import ca.mcgill.ecse211.Gyro.AngleSampler;
+import ca.mcgill.ecse211.Gyro.GyroPoller;
 import ca.mcgill.ecse211.Color.ColorPoller;
 import ca.mcgill.ecse211.Light.LightLocalizer;
 import ca.mcgill.ecse211.Light.LightPoller;
@@ -19,6 +21,7 @@ import lejos.hardware.lcd.TextLCD;
 import lejos.hardware.motor.EV3LargeRegulatedMotor;
 import lejos.hardware.port.Port;
 import lejos.hardware.sensor.EV3ColorSensor;
+import lejos.hardware.sensor.EV3GyroSensor;
 import lejos.hardware.sensor.EV3UltrasonicSensor;
 import lejos.hardware.sensor.SensorModes;
 import lejos.hardware.sensor.UARTSensor;
@@ -30,7 +33,7 @@ public class Lab5 {
 	private static final EV3LargeRegulatedMotor rightMotor = new EV3LargeRegulatedMotor(LocalEV3.get().getPort("D"));
 
 	private static final Port usPort = LocalEV3.get().getPort("S4");
-//	private static final Port usPort2 = LocalEV3.get().getPort("S2");
+	private static final Port gyroPort = LocalEV3.get().getPort("S2");
 	private static final Port lsPort = LocalEV3.get().getPort("S1");
 	private static final Port csPort = LocalEV3.get().getPort("S3");
 
@@ -38,9 +41,9 @@ public class Lab5 {
 	public static UARTSensor usSensor = new EV3UltrasonicSensor(usPort);
 	public static SampleProvider usValue = usSensor.getMode("Distance");
 
-	//Setting up ultrasonic sensor 2
-//	public static UARTSensor usSensor2 = new EV3UltrasonicSensor(usPort2);
-//	public static SampleProvider usValue2 = usSensor2.getMode("Distance");
+	//Setting up gyro sensor 
+	public static EV3GyroSensor gyroSensor = new EV3GyroSensor(gyroPort);
+	public static SampleProvider gyroValue = gyroSensor.getMode("Angle");
 	
 	//Setting up light sensor
 
@@ -53,12 +56,12 @@ public class Lab5 {
 	private static final TextLCD lcd = LocalEV3.get().getTextLCD();
 
 	public static final double WHEEL_RAD = 2.2;
-	public static final double WHEEL_BASE = 10.40;
+	public static final double WHEEL_BASE = 10.45;
 	public static final double TILE_SIZE = 30.48;
 	
-	public static final int startOption = 3;
+	public static final int startOption = 0;
 	public static final double[] startCorner = {2.0, 2.0};
-	public static final double[] endCorner = {6.0, 6.0};
+	public static final double[] endCorner = {5.0, 5.0};
 	public static final RingColors targetRing = RingColors.ORANGE;
 
 	
@@ -86,6 +89,8 @@ public class Lab5 {
 		LightLocalizer LSLocal = new LightLocalizer(odo, nav);
 		LightLocalizer.lock = USLocalizer.done;
 		LightPoller lsPoller = new LightPoller(lsValue, LSLocal);
+		AngleSampler gyro = new AngleSampler();
+		GyroPoller gyroPoller = new GyroPoller(gyroValue, gyro);
 		
 		
 		ColorClassifier CSLocal = new ColorClassifier(odo, nav, targetRing);
@@ -163,7 +168,15 @@ public class Lab5 {
 			e.printStackTrace();
 		}
 		
+		
+		// turns to 0, reset gyro to 0
 		nav.turnTo(odo.getXYT()[2], 0);
+		
+		Thread gyroPollerThread = new Thread(gyroPoller);
+		gyroPollerThread.start();
+		
+		gyroSensor.reset();
+		nav.setGyro(gyro);
 		
 		
 		// find ring part

@@ -1,10 +1,14 @@
 package ca.mcgill.ecse211.Lab5;
 
+import java.text.DecimalFormat;
 import java.util.ArrayList;
 
+import ca.mcgill.ecse211.Gyro.AngleSampler;
 import ca.mcgill.ecse211.Odometer.Odometer;
 import lejos.hardware.Button;
 import lejos.hardware.Sound;
+import lejos.hardware.ev3.LocalEV3;
+import lejos.hardware.lcd.TextLCD;
 import lejos.hardware.motor.EV3LargeRegulatedMotor;
 
 public class Navigation extends Thread{
@@ -18,20 +22,29 @@ public class Navigation extends Thread{
 	private final double TILE_SIZE;
 
 	private Odometer odometer;
+	private AngleSampler gyro;
 	private double x, y, theta;
 
 	public static double destX, destY, destT;
-	
+
 	public static Object lock;
-	
+
 	private ArrayList<double[]> _coordsList;
 	private boolean isNavigating;
-	
+
 	private volatile boolean running;
 
 	public Navigation(Odometer odo, EV3LargeRegulatedMotor leftMotor, EV3LargeRegulatedMotor rightMotor, 
 			final double WHEEL_RAD, final double WHEEL_BASE, double tileSize) {
+
+		this(odo, null, leftMotor, rightMotor, 
+				WHEEL_RAD,WHEEL_BASE, tileSize);
+	}
+
+	public Navigation(Odometer odo, AngleSampler gyro, EV3LargeRegulatedMotor leftMotor, EV3LargeRegulatedMotor rightMotor, 
+			final double WHEEL_RAD, final double WHEEL_BASE, double tileSize) {
 		this.odometer = odo;
+		this.gyro = gyro;
 		this.leftMotor = leftMotor;
 		this.rightMotor = rightMotor;
 		this.WHEEL_RAD = WHEEL_RAD;
@@ -41,6 +54,7 @@ public class Navigation extends Thread{
 		this._coordsList = new ArrayList<double[]>();
 
 	}
+
 
 	/**
 	 * Adds the navigation points to the coordList, setting up the thread
@@ -64,12 +78,12 @@ public class Navigation extends Thread{
 		}
 		this.running = false;
 	}
-	
+
 	boolean _travelTo(double navX, double navY) {
-		
+
 		// get current coordinates
 		double xyt[] = odometer.getXYT();
-		
+
 		theta = xyt[2];
 		x = xyt[0];
 		y = xyt[1];	
@@ -85,16 +99,23 @@ public class Navigation extends Thread{
 		//need to convert theta from degrees to radians
 		double deltaTheta = Math.atan2(deltaX, deltaY) / Math.PI * 180;
 
-		
+
 		//DEBUG
 		destX = navX;
 		destY = navY;
 		destT = deltaTheta;
-		
+
 		// turn to the correct direction
 		this._turnTo(theta, deltaTheta);
 		Sound.beep();
-		
+		// correct angle with gyro
+		if (this.gyro != null) {
+			float theta = this.gyro.getTheta();
+			this.odometer.setTheta(theta);
+			this._turnTo(theta, deltaTheta);
+			Sound.beepSequence();
+			
+		}
 		// move until destination is reached
 		// while loop is used in case of collision override
 		leftMotor.setSpeed(FORWARD_SPEED);
@@ -105,7 +126,7 @@ public class Navigation extends Thread{
 
 		while(true) {
 			double newTheta, newX, newY;
-			
+
 			double newXyt[] = odometer.getXYT();
 			//need to convert theta from degrees to radians
 			newTheta = newXyt[2];
@@ -132,7 +153,7 @@ public class Navigation extends Thread{
 					}
 				}
 			}
-			
+
 			// stop the navigation entirely
 			if (!running) {
 				leftMotor.stop(true);
@@ -140,7 +161,7 @@ public class Navigation extends Thread{
 				this._coordsList.add(0, new double[] {navX, navY});
 				return false;
 			}
- 
+
 			try {
 				Thread.sleep(20);
 			} catch (InterruptedException e) {
@@ -153,13 +174,14 @@ public class Navigation extends Thread{
 		rightMotor.stop(false);
 		this.isNavigating = false;
 		Sound.twoBeeps();
+
 		return true;
 	}
 
 	public void syncTravelTo(double navX, double navY) {
 		_travelTo(navX*TILE_SIZE, navY*TILE_SIZE);
 	}
-	
+
 	//	This method causes the robot to turn (on point) to the absolute heading theta. This method
 	//	should turn a MINIMAL angle to its target.
 	/**
@@ -181,7 +203,7 @@ public class Navigation extends Thread{
 		rightMotor.rotate(-convertAngle(WHEEL_RAD, WHEEL_BASE, deltaTheta), false);
 		this.isNavigating = false;
 	}
-	
+
 	public void turnTo(double currTheta, double destTheta) {
 		_turnTo(currTheta, destTheta);
 	}
@@ -199,8 +221,8 @@ public class Navigation extends Thread{
 		return theta;
 	}
 
-	
-	
+
+
 	boolean isNavigating() {
 		return isNavigating;
 	}
@@ -212,11 +234,15 @@ public class Navigation extends Thread{
 	public void setRunning(boolean running) {
 		this.running = running;
 	}
-	
+
 	public void clearCoordList() {
 		this._coordsList.clear();
 	}
-	
+
+	public void setGyro(AngleSampler gyro) {
+		this.gyro = gyro;
+	}
+
 	/**
 	 * This method allows the conversion of a distance to the total rotation of each wheel need to
 	 * cover that distance.
