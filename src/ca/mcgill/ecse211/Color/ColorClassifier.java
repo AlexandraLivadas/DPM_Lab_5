@@ -1,6 +1,7 @@
 package ca.mcgill.ecse211.Color;
 
 import ca.mcgill.ecse211.Ultrasonic.USLocalizer;
+import ca.mcgill.ecse211.Ultrasonic.UltrasonicPoller;
 
 import java.util.ArrayList;
 
@@ -9,6 +10,7 @@ import ca.mcgill.ecse211.Odometer.Odometer;
 import lejos.hardware.Button;
 import lejos.hardware.Sound;
 import lejos.hardware.ev3.LocalEV3;
+import lejos.hardware.lcd.LCD;
 import lejos.hardware.lcd.TextLCD;
 import lejos.robotics.SampleProvider;
 
@@ -16,6 +18,7 @@ public class ColorClassifier implements ColorController{
 
 	private Odometer odo;
 	private Navigation nav;
+	private UltrasonicPoller usPoller;
 
 	public enum ClassificationState{INIT, CLASSIFYING, DONE};
 
@@ -31,6 +34,7 @@ public class ColorClassifier implements ColorController{
 	public static RingColors targetRing;
 	public static boolean targetDetected;
 	public static RingColors detectedRing;
+	public static boolean classifyingDemo;
 
 	public static double[] blueRValues = {0.191671, 0.026218};
 	public static double[] blueGValues = {0.593177, 0.043177};
@@ -56,16 +60,18 @@ public class ColorClassifier implements ColorController{
 	public ClassificationState state = ClassificationState.INIT;
 
 
-	public ColorClassifier(Odometer odo, Navigation nav, RingColors targetRing) {
+	public ColorClassifier(Odometer odo, Navigation nav, RingColors targetRing, boolean classifying) {
 		this.odo = odo;
 		this.nav = nav;
 		this.running = true;
 		this.detectedRings = new ArrayList<RingColors>();
 		ColorClassifier.targetRing = targetRing;
+		this.classifyingDemo = classifying;
 		
 	}
 
 	public void process(float[] values) {
+		detectedRing = null;
 		RingColors ring = detectColor(values);
 		if (ring != null && detectedRings.indexOf(ring) == -1) {
 			detectedRings.add(ring);
@@ -75,6 +81,7 @@ public class ColorClassifier implements ColorController{
 				Sound.beep();
 
 				// stopping navigation
+				targetDetected = true;
 				Object lock = new Object();
 				Navigation.lock = lock;
 				nav.setRunning(false);
@@ -84,8 +91,10 @@ public class ColorClassifier implements ColorController{
 				synchronized(lock) {
 					lock.notifyAll();
 				}
+				if (!this.classifyingDemo) {
 				// stopping this thread
 				this.running = false;
+				}
 			} else {
 				Sound.twoBeeps();
 			}
@@ -134,4 +143,7 @@ public class ColorClassifier implements ColorController{
 	}
 
 
+	public void setClassifyingDemo(boolean set) {
+		ColorClassifier.classifyingDemo = set;
+	}
 }

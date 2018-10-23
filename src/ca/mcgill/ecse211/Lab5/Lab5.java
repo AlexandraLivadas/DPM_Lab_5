@@ -93,7 +93,7 @@ public class Lab5 {
 		GyroPoller gyroPoller = new GyroPoller(gyroValue, gyro);
 		
 		
-		ColorClassifier CSLocal = new ColorClassifier(odo, nav, targetRing);
+		ColorClassifier CSLocal = new ColorClassifier(odo, nav, targetRing, false);
 		ColorPoller csPoller = new ColorPoller(csValue, CSLocal);
 		double[] xyt;
 
@@ -104,9 +104,9 @@ public class Lab5 {
 			// ask the user whether the motors should drive in a square or float
 			lcd.drawString("< Left | Right >", 0, 0);
 			lcd.drawString("       |        ", 0, 1);
-			lcd.drawString("Falling| Rising ", 0, 2);
-			lcd.drawString(" edge  |   edge ", 0, 3);
-			lcd.drawString("       |        ", 0, 4);
+			lcd.drawString(" Color | Full   ", 0, 2);
+			lcd.drawString("Class- |   demo ", 0, 3);
+			lcd.drawString("ifying |        ", 0, 4);
 
 			buttonChoice = Button.waitForAnyPress(); // Record choice (left or right press)
 
@@ -114,12 +114,110 @@ public class Lab5 {
 
 		if (buttonChoice == Button.ID_LEFT) { //US Localization has been selected
 			// clear the display
-			lcd.clear();
-			USLocal.setType(LocalizationType.FALLING_EDGE);
+//			lcd.clear();
+//			USLocal.setType(LocalizationType.FALLING_EDGE);
+			CSLocal.setClassifyingDemo(true);
+			Thread csPollerThread = new Thread(csPoller);
+			csPollerThread.start();
+			
 		} else { 
 			// clear the display
 			lcd.clear();
 			USLocal.setType(LocalizationType.RISING_EDGE);
+			
+			// Start odometer and display threads
+			Thread odoThread = new Thread(odo);
+			odoThread.start();
+			Thread displayThread = new Thread(display);
+			displayThread.start();
+			Thread usPollerThread = new Thread(usPoller);
+			usPollerThread.start();
+			Thread lsPollerThread = new Thread(lsPoller);
+			lsPollerThread.start();
+			
+			try {
+				usPollerThread.join();
+				lsPollerThread.join();
+				usSensor.close();
+				lsSensor.close();
+			} catch (InterruptedException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			
+			// set position according to startOption
+			switch(startOption) {
+			case 1:
+				odo.setXYT(6*TILE_SIZE, 0, 270);
+				break;
+			case 3:
+				odo.setXYT(0, 6*TILE_SIZE, 90);
+				break;
+			case 2:
+				odo.setXYT(6*TILE_SIZE, 6*TILE_SIZE, 180);
+				break;
+			}
+			xyt = odo.getXYT();
+			
+			nav.travelTo(xyt[0]/TILE_SIZE, startCorner[1] - 1);
+			nav.travelTo(startCorner[0] - 1, startCorner[1] - 1);
+			Thread navThread  = new Thread(nav);
+			navThread.start();
+			
+			try {
+				navThread.join();
+			} catch (InterruptedException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			
+			nav.turnTo(odo.getXYT()[2], 0);
+			
+			
+			// find ring part
+			
+			// spiral code
+//			USDetector USDetect = new USDetector();
+//			UltrasonicPoller usPoller2 = new UltrasonicPoller(usValue2, USDetect);
+			
+			
+			
+			initSpiral(nav, startCorner, endCorner);
+			Thread csPollerThread = new Thread(csPoller);
+			csPollerThread.start();
+			navThread = new Thread(nav);
+			navThread.start();
+//			Thread usPollerThread2 = new Thread(usPoller2);
+//			usPollerThread2.start();
+//			
+//			
+			try {
+				navThread.join();
+				csPollerThread.join();
+				csSensor.close();
+//				usPollerThread2.join();
+			} catch (InterruptedException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			
+			// found the ring
+			// navigates to the end corner
+			nav.setRunning(true);
+			xyt =  odo.getXYT();
+			if (xyt[2] >= 46 && xyt[2] <= 135) {
+				nav.syncTravelTo(((int)xyt[0]/TILE_SIZE+0.5), xyt[1]/TILE_SIZE );	
+			} else if (xyt[2] >= 136 && xyt[2] <= 225) {
+				nav.syncTravelTo(xyt[0]/TILE_SIZE, ((int)xyt[1]/TILE_SIZE-0.5));	
+			} else if (xyt[2] >= 226 && xyt[2] <= 315) {
+				nav.syncTravelTo(((int)xyt[0]/TILE_SIZE-0.5), xyt[1]/TILE_SIZE );	
+			} else {
+				nav.syncTravelTo(xyt[0]/TILE_SIZE, ((int)xyt[1]/TILE_SIZE+0.5));
+			}
+			
+			nav.syncTravelTo(endCorner[0]+0.5, odo.getXYT()[1]/TILE_SIZE);	
+			nav.syncTravelTo(endCorner[0]+0.5, endCorner[1]);	
+			nav.syncTravelTo(endCorner[0],  endCorner[1]);
 		}
 		
 		// Start odometer and display threads
