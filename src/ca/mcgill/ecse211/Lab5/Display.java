@@ -6,6 +6,7 @@ import ca.mcgill.ecse211.Color.ColorClassifier;
 import ca.mcgill.ecse211.Color.ColorPoller;
 import ca.mcgill.ecse211.Odometer.Odometer;
 import ca.mcgill.ecse211.Odometer.OdometerExceptions;
+import ca.mcgill.ecse211.Ultrasonic.USDetector;
 import ca.mcgill.ecse211.Ultrasonic.USLocalizer;
 import ca.mcgill.ecse211.Ultrasonic.UltrasonicPoller;
 import lejos.hardware.ev3.LocalEV3;
@@ -20,6 +21,7 @@ public class Display extends Thread implements Runnable {
 	  private UltrasonicPoller usPoller;
 	  private ColorClassifier color;
 	  private ColorPoller csPoller;
+	  private USDetector usDetector;
 	  private TextLCD lcd;
 	  private double[] position;
 	  private final long DISPLAY_PERIOD = 25;
@@ -59,19 +61,52 @@ public class Display extends Thread implements Runnable {
 
 	      // Retrieve x, y and Theta information
 	      position = odo.getXYT();
-		     
-	      if (ColorClassifier.detectedRing != null) {
-		      lcd.drawString(ColorClassifier.detectedRing.toString(), 0, 3);
-		      if (ColorClassifier.targetDetected)
-		    	  lcd.drawString("Target Detected!", 0, 4);
+
+	  	  if (ColorClassifier.detectedRing != null) {
+	  		  lcd.clear();
+	    	  	  lcd.drawString("Object Detected!", 0, 0);
+		      lcd.drawString(ColorClassifier.detectedRing.toString(), 0, 1);
+//		      	if (ColorClassifier.targetDetected) {
+//		      		lcd.drawString("Target Detected!", 0, 2);
+//		      	}
+		      	try {
+		      		Thread.sleep(400);
+		      		lcd.clear();
+		      	} catch (InterruptedException e) {
+				// TODO Auto-generated catch block
+		      		e.printStackTrace();
+			} 
+
+	      }
+
+
+
+	      if (usPoller != null) {
+		      // Print x,y, and theta information
+		      DecimalFormat numberFormat = new DecimalFormat("######0.00");
+		      lcd.drawString("X: " + numberFormat.format(odo.getXYT()[0]), 0, 0);
+		      lcd.drawString("Y: " + numberFormat.format(odo.getXYT()[1]), 0, 1);
+		      lcd.drawString("T: " + numberFormat.format(odo.getXYT()[2]), 0, 2);
+		  	  if (ColorClassifier.detectedRing != null) {
+		  		  lcd.clear();
+		    	  	  lcd.drawString("Object Detected!", 0, 3);
+			      lcd.drawString(ColorClassifier.detectedRing.toString(), 0, 4);
+			      	if (ColorClassifier.targetDetected) {
+			      		lcd.drawString("Target Detected!", 0, 5);
+			      	}
+			      	try {
+			      		Thread.sleep(400);
+			      		lcd.clear();
+			      	} catch (InterruptedException e) {
+					// TODO Auto-generated catch block
+			      		e.printStackTrace();
+				} 
+
+		      }
 	      }
 	      
 	      
-	      // Print x,y, and theta information
-	      DecimalFormat numberFormat = new DecimalFormat("######0.00");
-	      lcd.drawString("X: " + numberFormat.format(odo.getXYT()[0]), 0, 0);
-	      lcd.drawString("Y: " + numberFormat.format(odo.getXYT()[1]), 0, 1);
-	      lcd.drawString("T: " + numberFormat.format(odo.getXYT()[2]), 0, 2);
+
 //	      
 //	      if (usPoller != null) {
 //	          lcd.drawString("Distance: " + numberFormat.format(usPoller.distance), 0, 3);

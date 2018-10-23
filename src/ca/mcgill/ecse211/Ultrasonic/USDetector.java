@@ -8,6 +8,7 @@ public class USDetector implements UltrasonicController {
 	public final int FILTER_OUT = 20;
 	public int filterControl;
 	public static volatile boolean running;
+	public static boolean objectDetected;
 	
 	
 	public static Object lock;
@@ -15,6 +16,7 @@ public class USDetector implements UltrasonicController {
 	public USDetector() {
 		this.filterControl = 0;
 		running = true;
+		objectDetected = false;
 		// TODO Auto-generated constructor stub
 	}
 
@@ -33,6 +35,7 @@ public class USDetector implements UltrasonicController {
 	@Override
 	public void process(int value) {
 		if (ringDetected(value)) {
+			objectDetected = true;
 			Sound.beepSequence();
 //			Object lock = new Object();
 //			USDetector.lock = lock;
