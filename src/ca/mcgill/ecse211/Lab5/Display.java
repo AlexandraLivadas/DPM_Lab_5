@@ -70,7 +70,7 @@ public class Display extends Thread implements Runnable {
 //		      		lcd.drawString("Target Detected!", 0, 2);
 //		      	}
 		      	try {
-		      		Thread.sleep(400);
+		      		Thread.sleep(1000);
 		      		lcd.clear();
 		      	} catch (InterruptedException e) {
 				// TODO Auto-generated catch block
@@ -95,7 +95,7 @@ public class Display extends Thread implements Runnable {
 			      		lcd.drawString("Target Detected!", 0, 5);
 			      	}
 			      	try {
-			      		Thread.sleep(400);
+			      		Thread.sleep(1000);
 			      		lcd.clear();
 			      	} catch (InterruptedException e) {
 					// TODO Auto-generated catch block
