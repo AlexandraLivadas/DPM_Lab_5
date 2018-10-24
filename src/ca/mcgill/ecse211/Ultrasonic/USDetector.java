@@ -1,6 +1,5 @@
 package ca.mcgill.ecse211.Ultrasonic;
 
-import ca.mcgill.ecse211.Lab5.Navigation;
 import lejos.hardware.Sound;
 
 public class USDetector implements UltrasonicController {
@@ -37,18 +36,6 @@ public class USDetector implements UltrasonicController {
 		if (ringDetected(value)) {
 			objectDetected = true;
 			Sound.beepSequence();
-//			Object lock = new Object();
-//			USDetector.lock = lock;
-//			Navigation.lock	= lock;
-//			synchronized(lock) {
-//				try {
-//					lock.wait();
-//					Thread.sleep(2000);
-//				} catch (InterruptedException e) {
-//					// TODO Auto-generated catch block
-//					e.printStackTrace();
-//				}
-//			}
 			
 		}
 	}

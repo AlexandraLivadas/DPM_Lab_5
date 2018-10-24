@@ -1,18 +1,20 @@
-package ca.mcgill.ecse211.Light;
+package ca.mcgill.ecse211.Gyro;
 
+import ca.mcgill.ecse211.Light.LightController;
 import lejos.robotics.SampleProvider;
 
-public class LightPoller extends Thread {
-	private SampleProvider ls;
-	private LightController cont;
-	private float[] lsData;
-	public int distance;
+public class GyroPoller extends Thread {
+
+	private SampleProvider gyro;
+	private GyroController cont;
+	private float[] gyroData;
+	public float value;
 
 	public volatile boolean running;
 
-	public LightPoller(SampleProvider ls, LightController cont) {
-		this.ls = ls;
-		this.lsData = new float[ls.sampleSize()];
+	public GyroPoller(SampleProvider gyro, GyroController cont) {
+		this.gyro = gyro;
+		this.gyroData = new float[gyro.sampleSize()];
 		this.cont = cont;
 		this.running = true;
 	}
@@ -32,19 +34,23 @@ public class LightPoller extends Thread {
 					try {
 						lock.wait();
 					} catch (InterruptedException e) {
-						
+					
 						e.printStackTrace();
 					}
 				}
 			}
 			
-			ls.fetchSample(lsData, 0); // acquire data
-			distance = (int)(lsData[0] * 100.0); // extract from buffer, cast to int
-			cont.process(distance); // now take action depending on value
+			
+			gyro.fetchSample(gyroData, 0); // acquire data
+			value = (gyroData[0]); // extract from buffer, cast to int
+			cont.process(value); // now take action depending on value
 			try {
-				Thread.sleep(20);
+				Thread.sleep(50);
 			} catch (Exception e) {
+				
 			} // Poor man's timed sampling
 		}
 	}
+
+
 }

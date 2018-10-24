@@ -1,13 +1,11 @@
 package ca.mcgill.ecse211.Ultrasonic;
 
-import ca.mcgill.ecse211.Lab5.Navigation;
+
 import ca.mcgill.ecse211.Light.LightLocalizer;
 import ca.mcgill.ecse211.Odometer.Odometer;
-import lejos.hardware.Button;
 import lejos.hardware.Sound;
 import lejos.hardware.motor.EV3LargeRegulatedMotor;
-import lejos.robotics.SampleProvider;
-import lejos.robotics.localization.OdometryPoseProvider;
+
 
 public class USLocalizer extends Thread implements UltrasonicController{
 
@@ -53,7 +51,6 @@ public class USLocalizer extends Thread implements UltrasonicController{
 	public static int WALL_ERROR = 5;
 	public static int TURN_ERROR = 0;
 
-	private static final int FORWARD_SPEED = 250;
 	private static final int ROTATE_SPEED = 120;
 	public static int ACCEL = 300;
 
@@ -153,11 +150,7 @@ public class USLocalizer extends Thread implements UltrasonicController{
 						rightMotor.forward();
 					}
 					break;
-				case CORRECTION:
-////					//If thetaA is greater than 360
-//					if(thetaA > thetaB) {
-//						thetaA -= 360;
-//					}
+				case CORRECTION:			
 					
 					//thetaAv will be 45 degrees away from zero degrees
 					this.thetaAv = (this.thetaA - this.thetaB)/2.0;
@@ -173,9 +166,6 @@ public class USLocalizer extends Thread implements UltrasonicController{
 					odo.setTheta(0);
 					odo.setTheta(0);
 					
-					//odo.setTheta(0);
-					//odo.setTheta(nav.normalizeAngle(odo.getXYT()[2]));
-					//odo.setPosition(new double [] {0.0, 0.0, 0.0}, new boolean [] {false, false, true});
 					this.state = LocalizationState.DONE;
 					break;	
 				case DONE:

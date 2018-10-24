@@ -1,20 +1,20 @@
 package ca.mcgill.ecse211.Lab5;
 
 import ca.mcgill.ecse211.Ultrasonic.*;
+
 import ca.mcgill.ecse211.Ultrasonic.USLocalizer.LocalizationType;
 import ca.mcgill.ecse211.Color.ColorClassifier;
 import ca.mcgill.ecse211.Color.ColorClassifier.RingColors;
 import ca.mcgill.ecse211.Gyro.AngleSampler;
 import ca.mcgill.ecse211.Color.ColorPoller;
-import ca.mcgill.ecse211.Light.LightCorrector;
 import ca.mcgill.ecse211.Light.LightLocalizer;
 import ca.mcgill.ecse211.Light.LightPoller;
+import ca.mcgill.ecse211.Light.LightCorrector;
 import ca.mcgill.ecse211.Odometer.Odometer;
 import ca.mcgill.ecse211.Odometer.OdometerExceptions;
 import lejos.hardware.Button;
 import lejos.hardware.Sound;
 import lejos.hardware.ev3.LocalEV3;
-import lejos.hardware.lcd.LCD;
 import lejos.hardware.lcd.TextLCD;
 import lejos.hardware.motor.EV3LargeRegulatedMotor;
 import lejos.hardware.port.Port;
@@ -149,7 +149,7 @@ public class Lab5 {
 				lsPollerThread.join();
 				usSensor.close();
 			} catch (InterruptedException e) {
-				// TODO Auto-generated catch block
+			
 				e.printStackTrace();
 			}
 			
@@ -179,27 +179,24 @@ public class Lab5 {
 			
 			nav.setCorrector(LSCorrector);
 			
-			
 			// travels to the left corner
-
 			xyt = odo.getXYT();			
-			//nav.travelTo(xyt[0]/TILE_SIZE, startCorner[1] - 1);
 			nav.travelTo(startCorner[0], startCorner[1]);
+			Sound.beep();
 			Thread navThread  = new Thread(nav);
 			navThread.start();
 			
 			try {
 				navThread.join();
 			} catch (InterruptedException e) {
-				// TODO Auto-generated catch block
+				
 				e.printStackTrace();
 			}
 			
 			Sound.beep();
 						
 			// find ring part
-			
-			// spiral code
+			// Makes the robot go in a square spiral 
 			initSpiral(nav, startCorner, endCorner);
 			
 			Thread csPollerThread = new Thread(csPoller);
@@ -218,11 +215,11 @@ public class Lab5 {
 				csSensor.close();
 
 			} catch (InterruptedException e) {
-				// TODO Auto-generated catch block
+				
 				e.printStackTrace();
 			}
 			
-			// found the ring
+			// Ring found
 			// navigates to the end corner
 			nav.setRunning(true);
 			xyt =  odo.getXYT();
@@ -242,6 +239,12 @@ public class Lab5 {
 			Sound.beep();
 		}
 	}
+	
+	/**
+	 * Makes the robot go in a square spiral 
+	 * 
+	 * @param navigation, startCorner, endCorner
+	 */
 	
 	public static void initSpiral(Navigation nav, double[] Ll, double[] Rr) {
 		double x, X, y, Y;

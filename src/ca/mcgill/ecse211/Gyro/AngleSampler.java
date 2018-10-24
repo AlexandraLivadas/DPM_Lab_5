@@ -33,6 +33,7 @@ public class AngleSampler {
 	public float getTheta() {
 		gyro.fetchSample(gyroData, 0); // acquire data
 		this.theta = -(gyroData[0]); 
+
 		return theta;
 	}
 
@@ -50,9 +51,8 @@ public class AngleSampler {
 	}
 
 	public boolean isRunning() {
-		// TODO Auto-generated method stub
+		
 		return this.running;
 	}
-
 
 }

@@ -1,13 +1,11 @@
 package ca.mcgill.ecse211.Light;
 
-import ca.mcgill.ecse211.Ultrasonic.USLocalizer;
+
 import ca.mcgill.ecse211.Lab5.Navigation;
 import ca.mcgill.ecse211.Odometer.Odometer;
-import lejos.hardware.Button;
+
 import lejos.hardware.Sound;
-import lejos.hardware.ev3.LocalEV3;
-import lejos.hardware.lcd.TextLCD;
-import lejos.robotics.SampleProvider;
+
 
 public class LightLocalizer implements LightController{
 
@@ -20,7 +18,7 @@ public class LightLocalizer implements LightController{
 
 
 	private double thetaX, thetaY;
-	private double correctedX, correctedY, correctedTheta;
+	private double correctedX, correctedY;
 	private double deltaThetaX, deltaThetaY, deltaTheta;
 	public static float firstReading = -1;
 	private double lightThreshold = 20.0;
