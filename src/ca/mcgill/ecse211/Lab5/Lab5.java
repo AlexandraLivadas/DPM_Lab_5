@@ -1,15 +1,16 @@
 package ca.mcgill.ecse211.Lab5;
 
 import ca.mcgill.ecse211.Ultrasonic.*;
+
 import ca.mcgill.ecse211.Ultrasonic.USLocalizer.LocalizationType;
 import ca.mcgill.ecse211.Color.ColorClassifier;
 import ca.mcgill.ecse211.Color.ColorClassifier.RingColors;
 import ca.mcgill.ecse211.Gyro.AngleSampler;
 import ca.mcgill.ecse211.Gyro.GyroPoller;
 import ca.mcgill.ecse211.Color.ColorPoller;
-import ca.mcgill.ecse211.Light.LightCorrector;
 import ca.mcgill.ecse211.Light.LightLocalizer;
 import ca.mcgill.ecse211.Light.LightPoller;
+import ca.mcgill.ecse211.Light.LightCorrector;
 import ca.mcgill.ecse211.Odometer.Odometer;
 import ca.mcgill.ecse211.Odometer.OdometerExceptions;
 import lejos.hardware.Button;
@@ -159,13 +160,13 @@ public class Lab5 {
 			// set position according to startOption
 			switch(startOption) {
 			case 1:
-				odo.setXYT(6*TILE_SIZE, 0, 270);
+				odo.setXYT(7*TILE_SIZE, 1, 270);
 				break;
 			case 3:
-				odo.setXYT(0, 6*TILE_SIZE, 90);
+				odo.setXYT(1, 7*TILE_SIZE, 90);
 				break;
 			case 2:
-				odo.setXYT(6*TILE_SIZE, 6*TILE_SIZE, 180);
+				odo.setXYT(7*TILE_SIZE, 7*TILE_SIZE, 180);
 				break;
 			}
 			
@@ -192,6 +193,7 @@ public class Lab5 {
 			xyt = odo.getXYT();			
 			//nav.travelTo(xyt[0]/TILE_SIZE, startCorner[1] - 1);
 			nav.travelTo(startCorner[0], startCorner[1]);
+			Sound.beep();
 			Thread navThread  = new Thread(nav);
 			navThread.start();
 			
@@ -238,6 +240,7 @@ public class Lab5 {
 			nav.syncTravelTo(endCorner[0]+0.5, odo.getXYT()[1]/TILE_SIZE);	
 			nav.syncTravelTo(endCorner[0]+0.5, endCorner[1]);	
 			nav.syncTravelTo(endCorner[0],  endCorner[1]);
+			Sound.beep();
 		}
 	}
 	

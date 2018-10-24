@@ -71,6 +71,7 @@ public class AngleSampler implements GyroController {
 
 	@Override
 	public void process(float value) {
+		
 		this.setTheta(-value);
 		// TODO Auto-generated method stub
 

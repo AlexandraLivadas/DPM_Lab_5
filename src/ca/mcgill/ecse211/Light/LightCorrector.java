@@ -119,7 +119,7 @@ public class LightCorrector implements LightController {
 			errorY = lineY % TILE_SIZE;
 
 			if (Math.abs(errorX) <= ERROR_THRESHOLD && errorX <= errorY) {
-				Sound.beepSequence();
+				//Sound.beepSequence();
 
 				lock.lock();
 				isReseting = true;
@@ -143,7 +143,7 @@ public class LightCorrector implements LightController {
 
 			} else if (Math.abs(errorY) <= ERROR_THRESHOLD) {
 				// probably y line
-				Sound.beepSequence();
+				//Sound.beepSequence();
 
 				lock.lock();
 				isReseting = true;
