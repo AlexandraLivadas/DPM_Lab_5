@@ -34,7 +34,7 @@ public class GyroPoller extends Thread {
 					try {
 						lock.wait();
 					} catch (InterruptedException e) {
-						// TODO Auto-generated catch block
+					
 						e.printStackTrace();
 					}
 				}

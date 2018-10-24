@@ -103,15 +103,13 @@ public class Navigation extends Thread{
 		//need to convert theta from degrees to radians
 		double deltaTheta = Math.atan2(deltaX, deltaY) / Math.PI * 180;
 
-
-		//DEBUG
 		destX = navX;
 		destY = navY;
 		destT = deltaTheta;
 
 		// turn to the correct direction
 		this._turnTo(theta, deltaTheta);
-		//Sound.beep();
+	
 		// correct angle with gyro
 		if (this.gyro != null) {
 			float theta = this.gyro.getTheta();
@@ -167,7 +165,7 @@ public class Navigation extends Thread{
 			try {
 				Thread.sleep(20);
 			} catch (InterruptedException e) {
-				// TODO Auto-generated catch block
+				
 				e.printStackTrace();
 			}
 
@@ -189,14 +187,16 @@ public class Navigation extends Thread{
 		_travelTo(navX*TILE_SIZE, navY*TILE_SIZE);
 	}
 
-	//	This method causes the robot to turn (on point) to the absolute heading theta. This method
-	//	should turn a MINIMAL angle to its target.
+	
 	/**
-	 * Turns the robot to the absolute (minima) heading theta
+	 * 
+	 * This method causes the robot to turn (on point) to the absolute (minima) heading theta. This method
+	 * should turn a MINIMAL angle to its target.
 	 * 
 	 * @param currTheta current theta
 	 * @param destTheta to turn robot by
 	 */
+	
 	void _turnTo(double currTheta, double destTheta) {
 		// get theta difference
 		double deltaTheta = destTheta - currTheta;

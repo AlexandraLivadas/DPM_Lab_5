@@ -21,7 +21,7 @@ public class AngleSampler implements GyroController {
 
 	public AngleSampler() {
 		this.running = true;
-		// TODO Auto-generated constructor stub
+		
 	}
 
 	public float getTheta() {
@@ -30,7 +30,8 @@ public class AngleSampler implements GyroController {
 	    try {
 	      while (isReseting) { // If a reset operation is being executed, wait
 	        // until it is over.
-	        doneReseting.await(); // Using await() is lighter on the CPU
+	        doneReseting.await(); 
+	        // Using await() is lighter on the CPU
 	        // than simple busy wait.
 	      }
 	     theta = this.theta;
@@ -58,13 +59,13 @@ public class AngleSampler implements GyroController {
 
 	@Override
 	public boolean isRunning() {
-		// TODO Auto-generated method stub
+		
 		return this.running;
 	}
 
 	@Override
 	public Object getLock() {
-		// TODO Auto-generated method stub
+		
 		return null;
 	}
 
@@ -73,7 +74,7 @@ public class AngleSampler implements GyroController {
 	public void process(float value) {
 		
 		this.setTheta(-value);
-		// TODO Auto-generated method stub
+		
 
 	}
 
