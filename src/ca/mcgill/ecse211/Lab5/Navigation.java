@@ -4,6 +4,7 @@ import java.text.DecimalFormat;
 import java.util.ArrayList;
 
 import ca.mcgill.ecse211.Gyro.AngleSampler;
+import ca.mcgill.ecse211.Light.LightCorrector;
 import ca.mcgill.ecse211.Odometer.Odometer;
 import lejos.hardware.Button;
 import lejos.hardware.Sound;
@@ -23,6 +24,8 @@ public class Navigation extends Thread{
 
 	private Odometer odometer;
 	private AngleSampler gyro;
+	private LightCorrector corrector;
+
 	private double x, y, theta;
 
 	public static double destX, destY, destT;
@@ -37,14 +40,15 @@ public class Navigation extends Thread{
 	public Navigation(Odometer odo, EV3LargeRegulatedMotor leftMotor, EV3LargeRegulatedMotor rightMotor, 
 			final double WHEEL_RAD, final double WHEEL_BASE, double tileSize) {
 
-		this(odo, null, leftMotor, rightMotor, 
+		this(odo, null, null, leftMotor, rightMotor, 
 				WHEEL_RAD,WHEEL_BASE, tileSize);
 	}
 
-	public Navigation(Odometer odo, AngleSampler gyro, EV3LargeRegulatedMotor leftMotor, EV3LargeRegulatedMotor rightMotor, 
+	public Navigation(Odometer odo, AngleSampler gyro, LightCorrector corrector, EV3LargeRegulatedMotor leftMotor, EV3LargeRegulatedMotor rightMotor, 
 			final double WHEEL_RAD, final double WHEEL_BASE, double tileSize) {
 		this.odometer = odo;
 		this.gyro = gyro;
+		this.corrector = corrector;
 		this.leftMotor = leftMotor;
 		this.rightMotor = rightMotor;
 		this.WHEEL_RAD = WHEEL_RAD;
@@ -107,14 +111,12 @@ public class Navigation extends Thread{
 
 		// turn to the correct direction
 		this._turnTo(theta, deltaTheta);
-//		Sound.beep();
+		Sound.beep();
 		// correct angle with gyro
 		if (this.gyro != null) {
 			float theta = this.gyro.getTheta();
 			this.odometer.setTheta(theta);
-			this._turnTo(theta, deltaTheta);
-			Sound.beepSequence();
-			
+			this._turnTo(theta, deltaTheta);			
 		}
 		// move until destination is reached
 		// while loop is used in case of collision override
@@ -136,7 +138,6 @@ public class Navigation extends Thread{
 			//If the difference between the current x/y and the x/y we started from is similar to the deltaX/deltaY, 
 			//Stop the motors because the point has been reached
 			if (Math.pow(newX - x, 2) + Math.pow(newY - y, 2) >= Math.pow(absDeltaX, 2) + Math.pow(absDeltaY, 2)) {
-				this.odometer.update(-(newX - x)*0.079, -(newY - y)*0.079 , 0);
 				break;
 			}
 
@@ -171,10 +172,15 @@ public class Navigation extends Thread{
 			}
 
 		}
+
 		leftMotor.stop(true);
 		rightMotor.stop(false);
 		this.isNavigating = false;
-//		Sound.twoBeeps();
+		
+		if (this.corrector != null) {
+			this.corrector.correct();
+		}
+		Sound.twoBeeps();
 
 		return true;
 	}
@@ -242,6 +248,10 @@ public class Navigation extends Thread{
 
 	public void setGyro(AngleSampler gyro) {
 		this.gyro = gyro;
+	}
+
+	public void setCorrector(LightCorrector corrector) {
+		this.corrector = corrector;
 	}
 
 	/**

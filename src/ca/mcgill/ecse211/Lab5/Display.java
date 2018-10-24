@@ -81,19 +81,18 @@ public class Display extends Thread implements Runnable {
 
 
 
-	      if (usPoller != null) {
+	      if (odo != null) {
 		      // Print x,y, and theta information
+	    	  
 		      DecimalFormat numberFormat = new DecimalFormat("######0.00");
 		      lcd.drawString("X: " + numberFormat.format(odo.getXYT()[0]), 0, 0);
 		      lcd.drawString("Y: " + numberFormat.format(odo.getXYT()[1]), 0, 1);
 		      lcd.drawString("T: " + numberFormat.format(odo.getXYT()[2]), 0, 2);
+		      
 		  	  if (ColorClassifier.detectedRing != null) {
 		  		  lcd.clear();
-		    	  	  lcd.drawString("Object Detected!", 0, 3);
-			      lcd.drawString(ColorClassifier.detectedRing.toString(), 0, 4);
-			      	if (ColorClassifier.targetDetected) {
-			      		lcd.drawString("Target Detected!", 0, 5);
-			      	}
+		    	  	  lcd.drawString("Object Detected!", 0, 0);
+			      lcd.drawString(ColorClassifier.detectedRing.toString(), 0, 1);
 			      	try {
 			      		Thread.sleep(1000);
 			      		lcd.clear();
@@ -101,6 +100,17 @@ public class Display extends Thread implements Runnable {
 					// TODO Auto-generated catch block
 			      		e.printStackTrace();
 				} 
+			     
+			    if (ColorClassifier.targetDetected) {
+			    		lcd.clear();
+			    		lcd.drawString("Target Information", 0, 0);
+			    		lcd.drawString("X: " + ColorClassifier.targetLocation[0], 0, 1);
+			    		lcd.drawString("Y: " + ColorClassifier.targetLocation[1], 0, 2);
+			    		lcd.drawString("T: " + ColorClassifier.targetLocation[2], 0, 3);
+			    		lcd.drawString("Red Sample: " + ColorClassifier.targetRGBValues[0], 0, 4);
+			    		lcd.drawString("Green Sample: " + ColorClassifier.targetRGBValues[1], 0, 5);
+			    		lcd.drawString("Blue Sample: " + ColorClassifier.targetRGBValues[2], 0, 6);
+			    }
 
 		      }
 	      }

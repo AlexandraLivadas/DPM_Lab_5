@@ -1,14 +1,13 @@
 package ca.mcgill.ecse211.Lab5;
 
-import ca.mcgill.ecse211.Ultrasonic.USDetector;
-import ca.mcgill.ecse211.Ultrasonic.USLocalizer;
+import ca.mcgill.ecse211.Ultrasonic.*;
 import ca.mcgill.ecse211.Ultrasonic.USLocalizer.LocalizationType;
-import ca.mcgill.ecse211.Ultrasonic.UltrasonicPoller;
 import ca.mcgill.ecse211.Color.ColorClassifier;
 import ca.mcgill.ecse211.Color.ColorClassifier.RingColors;
 import ca.mcgill.ecse211.Gyro.AngleSampler;
 import ca.mcgill.ecse211.Gyro.GyroPoller;
 import ca.mcgill.ecse211.Color.ColorPoller;
+import ca.mcgill.ecse211.Light.LightCorrector;
 import ca.mcgill.ecse211.Light.LightLocalizer;
 import ca.mcgill.ecse211.Light.LightPoller;
 import ca.mcgill.ecse211.Odometer.Odometer;
@@ -23,7 +22,6 @@ import lejos.hardware.port.Port;
 import lejos.hardware.sensor.EV3ColorSensor;
 import lejos.hardware.sensor.EV3GyroSensor;
 import lejos.hardware.sensor.EV3UltrasonicSensor;
-import lejos.hardware.sensor.SensorModes;
 import lejos.hardware.sensor.UARTSensor;
 import lejos.robotics.SampleProvider;
 
@@ -81,17 +79,31 @@ public class Lab5 {
 		int buttonChoice;
 
 		//Setting up the odometer and display
+		
 		Odometer odo = Odometer.getOdometer(leftMotor, rightMotor, WHEEL_BASE, WHEEL_RAD);
 		Navigation nav = new Navigation(odo, leftMotor, rightMotor, WHEEL_RAD, WHEEL_BASE, TILE_SIZE);
 		Display display = new Display(lcd);
+		
+		//define ultrasound localizer
+		
 		USLocalizer USLocal = new USLocalizer(odo);
 		UltrasonicPoller usPoller = new UltrasonicPoller(usValue, USLocal);
+		
+		// define light localizer
+		
 		LightLocalizer LSLocal = new LightLocalizer(odo, nav);
 		LightLocalizer.lock = USLocalizer.done;
 		LightPoller lsPoller = new LightPoller(lsValue, LSLocal);
+
+		
+		// define gyro corrector
 		AngleSampler gyro = new AngleSampler();
 		GyroPoller gyroPoller = new GyroPoller(gyroValue, gyro);
 		
+		
+		// define light corrector
+		LightCorrector LSCorrector = new LightCorrector();
+		LightPoller lsCorrectorPoller = new LightPoller(lsValue, LSCorrector);
 		
 		ColorClassifier CSLocal = new ColorClassifier(odo, nav, targetRing, false);
 		ColorPoller csPoller = new ColorPoller(csValue, CSLocal);
@@ -139,7 +151,6 @@ public class Lab5 {
 				usPollerThread.join();
 				lsPollerThread.join();
 				usSensor.close();
-				lsSensor.close();
 			} catch (InterruptedException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
@@ -157,10 +168,30 @@ public class Lab5 {
 				odo.setXYT(6*TILE_SIZE, 6*TILE_SIZE, 180);
 				break;
 			}
-			xyt = odo.getXYT();
 			
-			nav.travelTo(xyt[0]/TILE_SIZE, startCorner[1] - 1);
-			nav.travelTo(startCorner[0] - 1, startCorner[1] - 1);
+			
+			// start gyro corrector thread
+			nav.turnTo(odo.getXYT()[2], 0);
+			
+			Thread gyroPollerThread = new Thread(gyroPoller);
+			gyroPollerThread.start();
+			
+			gyroSensor.reset();
+			nav.setGyro(gyro);
+			
+			
+			// start light corrector thread
+			Thread lsCorrectorThread = new Thread(lsCorrectorPoller);
+			lsCorrectorThread.start();
+			
+			nav.setCorrector(LSCorrector);
+			
+			
+			// travels to the left corner
+
+			xyt = odo.getXYT();			
+			//nav.travelTo(xyt[0]/TILE_SIZE, startCorner[1] - 1);
+			nav.travelTo(startCorner[0], startCorner[1]);
 			Thread navThread  = new Thread(nav);
 			navThread.start();
 			
@@ -170,36 +201,21 @@ public class Lab5 {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
-			
-			nav.turnTo(odo.getXYT()[2], 0);
-			
-			Thread gyroPollerThread = new Thread(gyroPoller);
-			gyroPollerThread.start();
-			
-			gyroSensor.reset();
-			nav.setGyro(gyro);
-			
+						
 			// find ring part
 			
 			// spiral code
-//			USDetector USDetect = new USDetector();
-//			UltrasonicPoller usPoller2 = new UltrasonicPoller(usValue2, USDetect);
-			
 			initSpiral(nav, startCorner, endCorner);
 			
 			Thread csPollerThread = new Thread(csPoller);
 			csPollerThread.start();
 			navThread = new Thread(nav);
 			navThread.start();
-//			Thread usPollerThread2 = new Thread(usPoller2);
-//			usPollerThread2.start();
-//			
-//			
+		
 			try {
 				navThread.join();
 				csPollerThread.join();
 				csSensor.close();
-//				usPollerThread2.join();
 			} catch (InterruptedException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
@@ -230,7 +246,7 @@ public class Lab5 {
 		
 		x = Ll[0] - 0.5;
 		X = Rr[0] + 0.5;
-		y = Ll[1] - 0.5;
+		y = Ll[1] + 0.5;
 		Y = Rr[1] + 0.5;
 		
 		nav.travelTo(x, y);

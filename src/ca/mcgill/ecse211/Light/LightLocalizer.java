@@ -22,7 +22,7 @@ public class LightLocalizer implements LightController{
 	private double thetaX, thetaY;
 	private double correctedX, correctedY, correctedTheta;
 	private double deltaThetaX, deltaThetaY, deltaTheta;
-	private float firstReading;
+	public static float firstReading = -1;
 	private double lightThreshold = 20.0;
 	public float lightSensorIntensity;
 	private double sensorDistance = 11.3; //in cm, 4.5inches
@@ -40,7 +40,6 @@ public class LightLocalizer implements LightController{
 	public LightLocalizer(Odometer odo, Navigation nav) {
 		this.odo = odo;
 		this.nav = nav;
-		this.firstReading = -1;
 		this.lineCount = 0;
 		this.lineAngles = new double[4];
 		this.linePos = new double[3];
@@ -53,6 +52,7 @@ public class LightLocalizer implements LightController{
 
 			if (firstReading == -1) { //Set the first reading value
 				firstReading = value;
+				LightCorrector.firstReading = value;
 			}
 
 			//At this point, the robot will (ideally) be at 0-degrees
@@ -124,8 +124,8 @@ public class LightLocalizer implements LightController{
 			thetaY = Math.abs(lineAngles[2] - lineAngles[0]);
 			thetaX =  Math.abs(lineAngles[3] - lineAngles[1]);
 
-			correctedX = -sensorDistance*Math.cos(Math.toRadians(thetaY/2));
-			correctedY = -sensorDistance*Math.cos(Math.toRadians(thetaX/2));
+			correctedX = -sensorDistance*Math.cos(Math.toRadians(thetaY/2)) + 30.48;
+			correctedY = -sensorDistance*Math.cos(Math.toRadians(thetaX/2)) + 30.48;
 
 			//current theta value
 			//540 was used for deltaThetaY instead of 270 as an offset for more accurate calculations
@@ -137,7 +137,7 @@ public class LightLocalizer implements LightController{
 
 			odo.setXYT(correctedX, correctedY, -deltaTheta);	
 
-			nav.syncTravelTo(0, 0);
+			nav.syncTravelTo(1, 1);
 			nav.turnTo(odo.getXYT()[2], 0);
 			this.state = LocalizationState.DONE;
 			break;

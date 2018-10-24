@@ -47,6 +47,7 @@ public class GyroPoller extends Thread {
 			try {
 				Thread.sleep(50);
 			} catch (Exception e) {
+				
 			} // Poor man's timed sampling
 		}
 	}

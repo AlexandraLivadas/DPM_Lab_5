@@ -7,12 +7,7 @@ import java.util.ArrayList;
 
 import ca.mcgill.ecse211.Lab5.Navigation;
 import ca.mcgill.ecse211.Odometer.Odometer;
-import lejos.hardware.Button;
 import lejos.hardware.Sound;
-import lejos.hardware.ev3.LocalEV3;
-import lejos.hardware.lcd.LCD;
-import lejos.hardware.lcd.TextLCD;
-import lejos.robotics.SampleProvider;
 
 public class ColorClassifier implements ColorController{
 
@@ -30,11 +25,14 @@ public class ColorClassifier implements ColorController{
 	private final double WHEEL_RAD = 2.2;
 	
 	private ArrayList<RingColors> detectedRings;
+	private ArrayList<float[]> detectedRingValues;
 	
 	public static RingColors targetRing;
 	public static boolean targetDetected;
 	public static RingColors detectedRing;
 	public boolean classifyingDemo;
+	public static double[] targetLocation = new double[3];
+	public static float[] targetRGBValues = new float[3];
 
 	public static double[] blueRValues = {0.191671, 0.026218};
 	public static double[] blueGValues = {0.593177, 0.043177};
@@ -65,6 +63,7 @@ public class ColorClassifier implements ColorController{
 		this.nav = nav;
 		this.running = true;
 		this.detectedRings = new ArrayList<RingColors>();
+		this.detectedRingValues = new ArrayList<float[]>();
 		ColorClassifier.targetRing = targetRing;
 		this.classifyingDemo = classifying;
 		
@@ -78,6 +77,7 @@ public class ColorClassifier implements ColorController{
 		
 		if (ring != null && detectedRings.indexOf(ring) == -1 && !this.classifyingDemo) {
 			detectedRings.add(ring);
+			detectedRingValues.add(values);
 			ColorClassifier.detectedRing = ring;
 			
 			if (ring == targetRing) {
@@ -85,6 +85,8 @@ public class ColorClassifier implements ColorController{
 
 				// stopping navigation
 				targetDetected = true;
+				targetLocation = odo.getXYT();
+				targetRGBValues = values;
 				Object lock = new Object();
 				Navigation.lock = lock;
 				nav.setRunning(false);
@@ -104,8 +106,6 @@ public class ColorClassifier implements ColorController{
 			ColorClassifier.detectedRing = ring;
 				//Sound.beep();
 		}	
-		
-		
 	}
 
 
@@ -119,9 +119,9 @@ public class ColorClassifier implements ColorController{
 				withinGaussDist(G, blueGValues, 2) &&
 				withinGaussDist(B, blueBValues, 2)) {
 			return RingColors.BLUE;
-		} else if (withinGaussDist(R, greenRValues, 2) &&
-				withinGaussDist(G, greenGValues, 2) &&
-				withinGaussDist(B, greenBValues, 2)) {
+		} else if (withinGaussDist(R, greenRValues, 3) &&
+				withinGaussDist(G, greenGValues, 3) &&
+				withinGaussDist(B, greenBValues, 3)) {
 			return RingColors.GREEN;
 		} else if (withinGaussDist(R, orangeRValues, 2) &&
 				withinGaussDist(G, orangeGValues, 2) &&

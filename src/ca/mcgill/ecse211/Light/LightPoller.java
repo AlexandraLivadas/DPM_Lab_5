@@ -42,7 +42,7 @@ public class LightPoller extends Thread {
 			distance = (int)(lsData[0] * 100.0); // extract from buffer, cast to int
 			cont.process(distance); // now take action depending on value
 			try {
-				Thread.sleep(15);
+				Thread.sleep(20);
 			} catch (Exception e) {
 			} // Poor man's timed sampling
 		}

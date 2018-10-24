@@ -55,7 +55,7 @@ public class ColorPoller extends Thread {
 			
 			cont.process(rgbValues); // now take action depending on value
 			try {
-				Thread.sleep(15);
+				Thread.sleep(25);
 			} catch (Exception e) {
 			} // Poor man's timed sampling
 		}
