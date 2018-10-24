@@ -84,8 +84,8 @@ public class LightLocalizer implements LightController{
 
 			//Have the robot move backwards (by the sensorDistance amount)
 			//until the wheel center is at the (0, 0) point instead of the sensor
-			odo.leftMotor.rotate(-nav.convertDistance(WHEEL_RAD , sensorDistance), true);
-			odo.rightMotor.rotate(-nav.convertDistance(WHEEL_RAD, sensorDistance), false);
+			odo.leftMotor.rotate(-Navigation.convertDistance(WHEEL_RAD , sensorDistance), true);
+			odo.rightMotor.rotate(-Navigation.convertDistance(WHEEL_RAD, sensorDistance), false);
 			this.state = LocalizationState.SEEK;
 			break;
 

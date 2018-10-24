@@ -64,9 +64,7 @@ public class Display extends Thread implements Runnable {
 			} 
 
 	      }
-
-
-
+	  	  
 	      if (odo != null) {
 	    	  
 		      // Print x,y, and theta information

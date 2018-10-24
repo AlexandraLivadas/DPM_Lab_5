@@ -19,7 +19,7 @@ public class ColorPoller extends Thread {
 	}
 
 	/*
-	 * Sensors now return floats using a uniform protocol. Need to convert LS result to an integer
+	 * Sensors now return floats using a uniform protocol.
 	 * [0,255] (non-Javadoc)
 	 * 
 	 * @see java.lang.Thread#run()

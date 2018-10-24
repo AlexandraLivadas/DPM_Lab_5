@@ -98,7 +98,6 @@ public class ColorClassifier implements ColorController{
 		} else if (ring != null && classifyingDemo) {
 			Sound.buzz();
 			ColorClassifier.detectedRing = ring;
-				//Sound.beep();
 		}	
 	}
 

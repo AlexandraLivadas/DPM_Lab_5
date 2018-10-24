@@ -57,9 +57,9 @@ public class Lab5 {
 	public static final double TILE_SIZE = 30.48;
 	
 	public static final int startOption = 0;
-	public static final double[] startCorner = {2.0, 2.0};
-	public static final double[] endCorner = {5.0, 5.0};
-	public static final RingColors targetRing = RingColors.ORANGE;	
+	public static final double[] startCorner = {3.0, 2.0};
+	public static final double[] endCorner = {4.0, 4.0};
+	public static final RingColors targetRing = RingColors.BLUE;	
 
 	public static void main(String[] args) throws OdometerExceptions {
 		// init thread to exit application

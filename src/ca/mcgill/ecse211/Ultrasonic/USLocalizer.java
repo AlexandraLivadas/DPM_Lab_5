@@ -69,8 +69,7 @@ public class USLocalizer extends Thread implements UltrasonicController{
 		// initialize motor speed
 		leftMotor.setSpeed(ROTATE_SPEED);
 		rightMotor.setSpeed(ROTATE_SPEED);
-//		leftMotor.setAcceleration(ACCEL);
-//		rightMotor.setAcceleration(ACCEL);
+
 		this.running = true;
 	}
 
@@ -234,10 +233,7 @@ public class USLocalizer extends Thread implements UltrasonicController{
 					//thetaAv will be 45 degrees away from zero degrees
 					this.thetaAv = (this.thetaA - this.thetaB)/2.0;
 					this.thetaZero = this.thetaAv + 135;
-//					
-//					if(thetaA > thetaB) {
-//						thetaA -= 360;
-//					}
+
 	
 					//Rotate in the direction of thetaZero
 					leftMotor.rotate(convertAngle(odo.WHEEL_RAD, odo.TRACK, thetaZero + TURN_ERROR), true);

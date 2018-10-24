@@ -30,6 +30,10 @@ public class AngleSampler {
 		this.gyroData = new float[gyro.sampleSize()];
 	}
 
+	/**
+	 * Get angle detected by gyroscope
+	 * @return float
+	 */
 	public float getTheta() {
 		gyro.fetchSample(gyroData, 0); // acquire data
 		this.theta = -(gyroData[0]); 
