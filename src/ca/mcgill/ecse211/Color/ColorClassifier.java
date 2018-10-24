@@ -1,8 +1,5 @@
 package ca.mcgill.ecse211.Color;
 
-import ca.mcgill.ecse211.Ultrasonic.USLocalizer;
-import ca.mcgill.ecse211.Ultrasonic.UltrasonicPoller;
-
 import java.util.ArrayList;
 
 import ca.mcgill.ecse211.Lab5.Navigation;
@@ -13,16 +10,12 @@ public class ColorClassifier implements ColorController{
 
 	private Odometer odo;
 	private Navigation nav;
-	private UltrasonicPoller usPoller;
 
 	public enum ClassificationState{INIT, CLASSIFYING, DONE};
 
 	public enum RingColors{BLUE, GREEN, YELLOW, ORANGE};
 
-	private double lightThreshold = 20.0;
 	public float lightSensorIntensity;
-	private double sensorDistance = 11.3; //in cm, 4.5inches
-	private final double WHEEL_RAD = 2.2;
 	
 	private ArrayList<RingColors> detectedRings;
 	private ArrayList<float[]> detectedRingValues;
@@ -103,6 +96,7 @@ public class ColorClassifier implements ColorController{
 			}
 			
 		} else if (ring != null && classifyingDemo) {
+			Sound.buzz();
 			ColorClassifier.detectedRing = ring;
 				//Sound.beep();
 		}	
@@ -119,9 +113,9 @@ public class ColorClassifier implements ColorController{
 				withinGaussDist(G, blueGValues, 2) &&
 				withinGaussDist(B, blueBValues, 2)) {
 			return RingColors.BLUE;
-		} else if (withinGaussDist(R, greenRValues, 3) &&
-				withinGaussDist(G, greenGValues, 3) &&
-				withinGaussDist(B, greenBValues, 3)) {
+		} else if (withinGaussDist(R, greenRValues, 4) &&
+				withinGaussDist(G, greenGValues, 4) &&
+				withinGaussDist(B, greenBValues, 4)) {
 			return RingColors.GREEN;
 		} else if (withinGaussDist(R, orangeRValues, 2) &&
 				withinGaussDist(G, orangeGValues, 2) &&

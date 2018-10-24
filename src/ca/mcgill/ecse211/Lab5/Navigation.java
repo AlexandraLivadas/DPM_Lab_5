@@ -111,7 +111,7 @@ public class Navigation extends Thread{
 
 		// turn to the correct direction
 		this._turnTo(theta, deltaTheta);
-		Sound.beep();
+//		Sound.beep();
 		// correct angle with gyro
 		if (this.gyro != null) {
 			float theta = this.gyro.getTheta();
@@ -165,7 +165,7 @@ public class Navigation extends Thread{
 			}
 
 			try {
-				Thread.sleep(20);
+				Thread.sleep(25);
 			} catch (InterruptedException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
@@ -180,7 +180,7 @@ public class Navigation extends Thread{
 		if (this.corrector != null) {
 			this.corrector.correct();
 		}
-		Sound.twoBeeps();
+
 
 		return true;
 	}

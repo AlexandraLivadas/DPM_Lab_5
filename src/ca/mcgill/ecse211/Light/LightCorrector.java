@@ -25,7 +25,7 @@ public class LightCorrector implements LightController {
 	public static float firstReading = -1;
 
 	private static final float lightThreshold = 20.0f;
-	private static final double sensorDistance = 11.3; //in cm, 4.5inches
+	private static final double sensorDistance = 10.0; //in cm, 4.5inches
 
 
 	private double corrX;
@@ -78,12 +78,12 @@ public class LightCorrector implements LightController {
 				doneReseting.await(); // Using await() is lighter on the CPU
 				// than simple busy wait.
 			}	
+
 //			TextLCD lcd = LocalEV3.get().getTextLCD();
-//			DecimalFormat numberFormat = new DecimalFormat("######0.00");
-//			lcd.drawString("CX: " + numberFormat.format(corrX), 0, 5);
-//			lcd.drawString("CY: " + numberFormat.format(corrY), 0, 6);
-//
-//			while (Button.waitForAnyPress() != Button.ID_ENTER);
+//		      DecimalFormat numberFormat = new DecimalFormat("######0.00");
+//		      lcd.drawString("eX: " + numberFormat.format(corrX), 0, 0);
+//		      lcd.drawString("eY: " + numberFormat.format(corrY), 0, 1);
+//		      while (Button.waitForAnyPress() != Button.ID_ENTER);
 
 			odometer.update(corrX, corrY, 0);
 			corrX = 0;
@@ -116,18 +116,26 @@ public class LightCorrector implements LightController {
 			lineX = xyt[0] - deltaX;
 			lineY = xyt[1] - deltaY;
 			errorX = lineX % TILE_SIZE;
+			if (errorX >= TILE_SIZE/2) {
+				errorX -= TILE_SIZE;
+			} else if (errorX <= -TILE_SIZE/2) {
+				errorX += TILE_SIZE;
+			}
+			
 			errorY = lineY % TILE_SIZE;
-
+			if (errorY >= TILE_SIZE/2) {
+				errorY -= TILE_SIZE;
+			} else if (errorY <= -TILE_SIZE/2) {
+				errorY += TILE_SIZE;
+			}
+			
 			if (Math.abs(errorX) <= ERROR_THRESHOLD && errorX <= errorY) {
 				Sound.beepSequence();
 
 				lock.lock();
 				isReseting = true;
 				try {
-					corrX = deltaX - (xyt[0] % TILE_SIZE);
-					if (Math.abs(corrX) > sensorDistance) {
-						corrX = 0;
-					}
+					corrX = -errorX;
 					isReseting = false; // Done reseting
 					doneReseting.signalAll(); // Let the other threads know that you are
 				} finally {
@@ -148,10 +156,7 @@ public class LightCorrector implements LightController {
 				lock.lock();
 				isReseting = true;
 				try {
-					corrY = deltaY - (xyt[1] % TILE_SIZE);
-					if (Math.abs(corrY) > sensorDistance) {
-						corrY = 0;
-					}
+					corrY = -errorY;
 					isReseting = false; // Done reseting
 					doneReseting.signalAll(); // Let the other threads know that you are
 				} finally {

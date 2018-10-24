@@ -4,7 +4,9 @@ import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
-public class AngleSampler implements GyroController {
+import lejos.robotics.SampleProvider;
+
+public class AngleSampler {
 
 	public boolean running;
 	private float theta;
@@ -18,28 +20,19 @@ public class AngleSampler implements GyroController {
 	// know that a reset
 	// operation is
 	// over.
+	
+	private SampleProvider gyro;
+	private float[] gyroData;
 
-	public AngleSampler() {
+	public AngleSampler(SampleProvider gyro) {
 		this.running = true;
-		// TODO Auto-generated constructor stub
+		this.gyro = gyro;
+		this.gyroData = new float[gyro.sampleSize()];
 	}
 
 	public float getTheta() {
-		float theta = 0;
-	    lock.lock();
-	    try {
-	      while (isReseting) { // If a reset operation is being executed, wait
-	        // until it is over.
-	        doneReseting.await(); // Using await() is lighter on the CPU
-	        // than simple busy wait.
-	      }
-	     theta = this.theta;
-	    } catch (InterruptedException e) {
-	      // Print exception to screen
-	      e.printStackTrace();
-	    } finally {
-	      lock.unlock();
-	    }
+		gyro.fetchSample(gyroData, 0); // acquire data
+		this.theta = -(gyroData[0]); 
 		return theta;
 	}
 
@@ -56,24 +49,10 @@ public class AngleSampler implements GyroController {
 		}
 	}
 
-	@Override
 	public boolean isRunning() {
 		// TODO Auto-generated method stub
 		return this.running;
 	}
 
-	@Override
-	public Object getLock() {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-
-	@Override
-	public void process(float value) {
-		this.setTheta(-value);
-		// TODO Auto-generated method stub
-
-	}
 
 }

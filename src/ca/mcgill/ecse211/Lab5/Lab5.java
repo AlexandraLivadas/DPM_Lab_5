@@ -5,7 +5,6 @@ import ca.mcgill.ecse211.Ultrasonic.USLocalizer.LocalizationType;
 import ca.mcgill.ecse211.Color.ColorClassifier;
 import ca.mcgill.ecse211.Color.ColorClassifier.RingColors;
 import ca.mcgill.ecse211.Gyro.AngleSampler;
-import ca.mcgill.ecse211.Gyro.GyroPoller;
 import ca.mcgill.ecse211.Color.ColorPoller;
 import ca.mcgill.ecse211.Light.LightCorrector;
 import ca.mcgill.ecse211.Light.LightLocalizer;
@@ -60,10 +59,7 @@ public class Lab5 {
 	public static final int startOption = 0;
 	public static final double[] startCorner = {2.0, 2.0};
 	public static final double[] endCorner = {5.0, 5.0};
-	public static final RingColors targetRing = RingColors.ORANGE;
-
-	
-	
+	public static final RingColors targetRing = RingColors.ORANGE;	
 
 	public static void main(String[] args) throws OdometerExceptions {
 		// init thread to exit application
@@ -97,8 +93,7 @@ public class Lab5 {
 
 		
 		// define gyro corrector
-		AngleSampler gyro = new AngleSampler();
-		GyroPoller gyroPoller = new GyroPoller(gyroValue, gyro);
+		AngleSampler gyro = new AngleSampler(gyroValue);
 		
 		
 		// define light corrector
@@ -126,9 +121,11 @@ public class Lab5 {
 
 		if (buttonChoice == Button.ID_LEFT) { //US Localization has been selected
 			// clear the display
-//			lcd.clear();
+			lcd.clear();
 //			USLocal.setType(LocalizationType.FALLING_EDGE);
 			CSLocal.setClassifyingDemo(true);
+			Thread displayThread = new Thread(display);
+			displayThread.start();
 			Thread csPollerThread = new Thread(csPoller);
 			csPollerThread.start();
 			
@@ -159,23 +156,19 @@ public class Lab5 {
 			// set position according to startOption
 			switch(startOption) {
 			case 1:
-				odo.setXYT(6*TILE_SIZE, 0, 270);
+				odo.setXYT(7*TILE_SIZE, 1*TILE_SIZE, 270);
 				break;
 			case 3:
-				odo.setXYT(0, 6*TILE_SIZE, 90);
+				odo.setXYT(1*TILE_SIZE, 7*TILE_SIZE, 90);
 				break;
 			case 2:
-				odo.setXYT(6*TILE_SIZE, 6*TILE_SIZE, 180);
+				odo.setXYT(7*TILE_SIZE, 7*TILE_SIZE, 180);
 				break;
 			}
 			
 			
 			// start gyro corrector thread
 			nav.turnTo(odo.getXYT()[2], 0);
-			
-			Thread gyroPollerThread = new Thread(gyroPoller);
-			gyroPollerThread.start();
-			
 			gyroSensor.reset();
 			nav.setGyro(gyro);
 			
@@ -201,6 +194,8 @@ public class Lab5 {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
+			
+			Sound.beep();
 						
 			// find ring part
 			
@@ -213,9 +208,15 @@ public class Lab5 {
 			navThread.start();
 		
 			try {
-				navThread.join();
-				csPollerThread.join();
+				while (true) {
+					if(!navThread.isAlive()) {
+						CSLocal.running = false;
+						break;
+					}
+					Thread.sleep(500);
+				}
 				csSensor.close();
+
 			} catch (InterruptedException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
@@ -238,6 +239,7 @@ public class Lab5 {
 			nav.syncTravelTo(endCorner[0]+0.5, odo.getXYT()[1]/TILE_SIZE);	
 			nav.syncTravelTo(endCorner[0]+0.5, endCorner[1]);	
 			nav.syncTravelTo(endCorner[0],  endCorner[1]);
+			Sound.beep();
 		}
 	}
 	
