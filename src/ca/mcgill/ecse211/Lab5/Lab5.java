@@ -205,13 +205,8 @@ public class Lab5 {
 			navThread.start();
 		
 			try {
-				while (true) {
-					if(!navThread.isAlive()) {
-						CSLocal.running = false;
-						break;
-					}
-					Thread.sleep(500);
-				}
+				navThread.join();
+				CSLocal.running = false;
 				csSensor.close();
 
 			} catch (InterruptedException e) {

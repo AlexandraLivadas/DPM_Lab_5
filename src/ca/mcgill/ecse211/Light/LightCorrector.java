@@ -16,13 +16,14 @@ public class LightCorrector implements LightController {
 	public static float firstReading = -1;
 
 	private static final float lightThreshold = 20.0f;
-	private static final double sensorDistance = 10.0; //in cm, 4.5inches
+	private static final double sensorDistance = 11.6; //in cm, 4.5inches
 
 	private double corrX;
 	private double corrY;
 
 	public static final double TILE_SIZE = Lab5.TILE_SIZE;
-	private static final float ERROR_THRESHOLD = 4.0f;
+	public static final double HALF_TILE_SIZE = Lab5.TILE_SIZE/2;
+	private static final float ERROR_THRESHOLD = 5.0f;
 
 	public static Lock lock = new ReentrantLock(true); // Fair lock for
 	// concurrent writing
@@ -95,17 +96,18 @@ public class LightCorrector implements LightController {
 			deltaY = Math.cos(Math.toRadians(xyt[2])) * sensorDistance;
 			lineX = xyt[0] - deltaX;
 			lineY = xyt[1] - deltaY;
+			
 			errorX = lineX % TILE_SIZE;
-			if (errorX >= TILE_SIZE/2) {
+			if (errorX >= HALF_TILE_SIZE) {
 				errorX -= TILE_SIZE;
-			} else if (errorX <= -TILE_SIZE/2) {
+			} else if (errorX <= -HALF_TILE_SIZE) {
 				errorX += TILE_SIZE;
 			}
 			
 			errorY = lineY % TILE_SIZE;
-			if (errorY >= TILE_SIZE/2) {
+			if (errorY >= HALF_TILE_SIZE) {
 				errorY -= TILE_SIZE;
-			} else if (errorY <= -TILE_SIZE/2) {
+			} else if (errorY <= -HALF_TILE_SIZE) {
 				errorY += TILE_SIZE;
 			}
 			
